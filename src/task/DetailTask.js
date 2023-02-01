@@ -9,7 +9,7 @@ class DetailTask{
 
     async execute(url){
         let detailClass = require(`${this._dirName}`)
-        let detail = new detailClass(this._config);
+        let detail = new detailClass(this._config, this._collectSite);
         const item = await detail.extractFromItemList(url);
         return item;
     }

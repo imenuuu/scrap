@@ -11,9 +11,6 @@ let ipCnt;
 let ipList;
 let global;
 
-let collectSite;
-
-
 class DnsDetail {
     constructor(config, collectSite) {
         this._glbConfig = config;
@@ -32,7 +29,7 @@ class DnsDetail {
             // global.args.push('--proxy-server=' + ip);
 
             
-            const item = await extractItemDetail(url)
+            const item = await extractItemDetail(url, this.collectSite)
             //global.args.pop();
 
             return item;
@@ -43,7 +40,7 @@ class DnsDetail {
     }
 }
 
-async function extractItemDetail(url) {
+async function extractItemDetail(url, collectSite) {
     const browser = await puppeteer.launch(global);
     let context = await browser.createIncognitoBrowserContext();
     const page = await context.newPage();
@@ -73,7 +70,7 @@ async function extractItemDetail(url) {
         const title = detailPage('h1.product-card-top__title').text();
         const item_num = await getItemNum(url);
         if(!await isNotUndefinedOrEmpty(title)){
-            await makeNotFoundColtItem(cItem, url, item_num, detailPage);
+            await makeNotFoundColtItem(cItem, url, collectSite, item_num, detailPage);
             return cItem;
         }
         logger.info('ITEM_NUM: ' + item_num + ' TITLE:' + title);
@@ -109,8 +106,7 @@ async function extractItemDetail(url) {
             cItem.ColtItemDiscount.discountRate = discountRate;
         }
 
-        await makeColtItem(cItem, url, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice);
-    
+        await makeColtItem(cItem, url, collectSite, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice);
         //--option--
         let optionList = await getOptionInfo(detailPage);
 
@@ -149,19 +145,19 @@ async function getStockInfo(cItem, page, detailPage, url, optionList, product_co
             switch (i) {
                 case 0:
                     option1 = optionList[i]
-                    cItem.ColtItem.COLOR_OPTION = option1;
+                    cItem.ColtItem.colorOption = option1;
                 break;
                 case 1:
                     option2 = optionList[i]
-                    cItem.ColtItem.SIZE_OPTION = option2;
+                    cItem.ColtItem.sizeOption = option2;
                 break;
                 case 2:
                     option3 = optionList[i]
-                    cItem.ColtItem.STYLE_OPTION = option3;
+                    cItem.ColtItem.styleOption = option3;
                 break;
                 case 3:
                     option4 = optionList[i]
-                    cItem.ColtItem.GIFT_OPTION = option4;
+                    cItem.ColtItem.giftOption = option4;
                 break;
             }
         }
@@ -292,8 +288,8 @@ async function requestAddCart(detailPage, page, product_code, url){
 
 }
 
-async function makeColtItem(cItem, url, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice){
-    cItem.ColtItem.collectSite = this.collectSite;
+async function makeColtItem(cItem, url, collectSite,  title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice){
+    cItem.ColtItem.collectSite = collectSite;
     cItem.ColtItem.collectUrl = url;
     cItem.ColtItem.siteName = 'DNS';
     cItem.ColtItem.priceStdCd = '017';
@@ -309,12 +305,12 @@ async function makeColtItem(cItem, url, title, item_num, category, brand_name, a
     cItem.ColtItem.addInfo = addInfo;
 }
 
-async function makeNotFoundColtItem(cItem, url, item_num, detailPage){
+async function makeNotFoundColtItem(cItem, url, collectSite, item_num, detailPage){
     let title = detailPage('div.site-error-404 > div.site-error-404__message > h1 ').text();
     if(title.includes('Извините, данный товар временно отсутствует в продаже')){
         let category  = 'NO_CATEGORY';
         let image = detailPage('div.site-error-404 > div.site-error-404__image > img').attr('src');
-        cItem.ColtItem.collectSite = this.collectSite;
+        cItem.ColtItem.collectSite = collectSite;
         cItem.ColtItem.collectUrl = url;
         cItem.ColtItem.siteName = 'DNS';
         cItem.ColtItem.priceStdCd = '017';
