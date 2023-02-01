@@ -1,8 +1,8 @@
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const ColtItem = require('../../../dto/ColtItem');
-const ColtIvt = require('../../../dto/ColtIvt');
-const ColtImageNew = require('../../../dto/ColtImageNew');
+const ColtIvt = require('../../../dto/ColtItemIvt');
+const ColtImage = require('../../../dto/ColtImage');
 const hash = require('../../../util/HashUtil');
 const { jsonToStr, strToJson } = require('../../../util/Jsonutil');
 const logger = require('../../../config/logger/Logger');
@@ -19,7 +19,7 @@ class DnsDetail {
         this._glbConfig = config;
         this._glbConfig.userDataDir = service.DETAIL_PUPPET_PROFILE;
         global = this._glbConfig;
-        collectSite = collectSite;
+        this.collectSite = collectSite;
     }
 
     async extractFromItemList(url) {
@@ -105,8 +105,8 @@ async function extractItemDetail(url) {
         if(disPrice > 0){
             ivtAddPrice = disPrice;
             let discountRate = Math.round((orgPrice - disPrice) / orgPrice * 100)
-            cItem.ColtItemDiscount.DISCOUNT_PRICE = disPrice;
-            cItem.ColtItemDiscount.DISCOUNT_RATE = discountRate;
+            cItem.ColtItemDiscount.discountPrice = disPrice;
+            cItem.ColtItemDiscount.discountRate = discountRate;
         }
 
         await makeColtItem(cItem, url, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice);
@@ -122,10 +122,10 @@ async function extractItemDetail(url) {
             console.log('getImageAndVideoInfo Fail')
         }
         imageList.map((image) => {
-            const imageNew = new ColtImageNew();
-            imageNew.coltImageNew.GOODS_IMAGE = image;
-            imageNew.coltImageNew.HASH = hash.toHash(image);
-            cItem.ColtImageNewList.push(imageNew);
+            const coltImage = new ColtImage();
+            coltImage.ColtImage.goodsImage = image;
+            coltImage.ColtImage.hash = hash.toHash(image);
+            cItem.ColtImageList.push(coltImage);
         });
     
 
@@ -208,14 +208,14 @@ async function getStockInfo(cItem, page, detailPage, url, optionList, product_co
     }
     
     const ivt = new ColtIvt();
-    ivt.coltIvt.STOCK_ID = product_code;
-    ivt.coltIvt.ADD_PRICE = ivtAddPrice;
-    ivt.coltIvt.COLOR_OPTION = option1;
-    ivt.coltIvt.SIZE_OPTION = option2;
-    ivt.coltIvt.STYLE_OPTION = option3;
-    ivt.coltIvt.GIFT_OPTION = option4;
-    ivt.coltIvt.OPTION = stockOption;
-    ivt.coltIvt.STOCK_AMOUNT = stockAmout;
+    ivt.ColtItemIvt.stockId = product_code;
+    ivt.ColtItemIvt.addPrice = ivtAddPrice;
+    ivt.ColtItemIvt.colorOption = option1;
+    ivt.ColtItemIvt.sizeOption = option2;
+    ivt.ColtItemIvt.styleOption = option3;
+    ivt.ColtItemIvt.giftOption = option4;
+    ivt.ColtItemIvt.option = stockOption;
+    ivt.ColtItemIvt.stockAmount = stockAmout;
     cItem.ColtItemIvtList.push(ivt);
 }
 
@@ -293,20 +293,20 @@ async function requestAddCart(detailPage, page, product_code, url){
 }
 
 async function makeColtItem(cItem, url, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice){
-    cItem.ColtItem.COLLECT_SITE = this.collectSite;
-    cItem.ColtItem.COLLECT_URL = url;
-    cItem.ColtItem.SITE_NAME = 'DNS';
-    cItem.ColtItem.PRICE_STD_CODE = '017';
+    cItem.ColtItem.collectSite = this.collectSite;
+    cItem.ColtItem.collectUrl = url;
+    cItem.ColtItem.siteName = 'DNS';
+    cItem.ColtItem.priceStdCd = '017';
 
-    cItem.ColtItem.ITEM_NUM = item_num;
-    cItem.ColtItem.GOODS_NAME = title;
-    cItem.ColtItem.GOODS_CATE = category;
-    cItem.ColtItem.BRAND_NAME = brand_name;
-    cItem.ColtItem.PRICE = orgPrice;
-    cItem.ColtItem.SITE_PRICE = orgPrice;
-    cItem.ColtItem.TOTAL_EVAL_CNT = totalEvalutCnt;
-    cItem.ColtItem.AVG_POINT = avgPoint;
-    cItem.ColtItem.ADD_INFO = addInfo;
+    cItem.ColtItem.itemNum = item_num;
+    cItem.ColtItem.goodsName = title;
+    cItem.ColtItem.goodsCate = category;
+    cItem.ColtItem.brandName = brand_name;
+    cItem.ColtItem.price = orgPrice;
+    cItem.ColtItem.sitePrice = orgPrice;
+    cItem.ColtItem.totalEvalCnt = totalEvalutCnt;
+    cItem.ColtItem.fivePoint = avgPoint;
+    cItem.ColtItem.addInfo = addInfo;
 }
 
 async function makeNotFoundColtItem(cItem, url, item_num, detailPage){
@@ -314,32 +314,31 @@ async function makeNotFoundColtItem(cItem, url, item_num, detailPage){
     if(title.includes('Извините, данный товар временно отсутствует в продаже')){
         let category  = 'NO_CATEGORY';
         let image = detailPage('div.site-error-404 > div.site-error-404__image > img').attr('src');
-        cItem.ColtItem.COLLECT_SITE = this.collectSite;
-        cItem.ColtItem.COLLECT_URL = url;
-        cItem.ColtItem.SITE_NAME = 'DNS';
-        cItem.BS_URL_ID = ColtBsUrlItem.ID;
-        cItem.ColtItem.PRICE_STD_CODE = '017';
+        cItem.ColtItem.collectSite = this.collectSite;
+        cItem.ColtItem.collectUrl = url;
+        cItem.ColtItem.siteName = 'DNS';
+        cItem.ColtItem.priceStdCd = '017';
     
-        cItem.ColtItem.ITEM_NUM = item_num;
-        cItem.ColtItem.GOODS_NAME = 'Page Not Found';
-        cItem.ColtItem.GOODS_CATE = category;
-        cItem.ColtItem.BRAND_NAME = '';
-        cItem.ColtItem.PRICE = 0;
-        cItem.ColtItem.SITE_PRICE = 0;
-        cItem.ColtItem.TOTAL_EVAL_CNT = 0;
-        cItem.ColtItem.AVG_POINT = '0.0';
-        cItem.ColtItem.ADD_INFO = '';
+        cItem.ColtItem.itemNum = item_num;
+        cItem.ColtItem.goodsName = 'Page Not Found';
+        cItem.ColtItem.goodsCate = category;
+        cItem.ColtItem.brandName = '';
+        cItem.ColtItem.price = 0;
+        cItem.ColtItem.sitePrice = 0;
+        cItem.ColtItem.totalEvalCnt = 0;
+        cItem.ColtItem.fivePoint = '0.0';
+        cItem.ColtItem.addInfo = '';
 
-        const imageNew = new ColtImageNew();
-        imageNew.coltImageNew.GOODS_IMAGE = image;
-        imageNew.coltImageNew.HASH = hash.toHash(image);
-        cItem.ColtImageNewList.push(imageNew);
+        const coltImage = new ColtImage();
+        coltImage.ColtImage.goodsImage = image;
+        coltImage.ColtImage.hash = hash.toHash(image);
+        cItem.ColtImageList.push(coltImage);
 
         const ivt = new ColtIvt();
-        ivt.coltIvt.STOCK_ID = item_num;
-        ivt.coltIvt.ADD_PRICE = 0;
-        ivt.coltIvt.OPTION = 'Not Found';
-        ivt.coltIvt.STOCK_AMOUNT = -999;
+        ivt.ColtItemIvt.stockId = item_num;
+        ivt.ColtItemIvt.addPrice = 0;
+        ivt.ColtItemIvt.option = 'Not Found';
+        ivt.ColtItemIvt.stockAmount = -999;
         cItem.ColtItemIvtList.push(ivt);     
 
         logger.info('Not Found Page! , ITEM_NUM: '+ item_num);
