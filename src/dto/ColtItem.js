@@ -4,10 +4,12 @@ const { currentDate, currentDay, collectDay } = require("../util/Dateutil");
 class ColtItem {
     ColtItem = {
         itemNum: '',
+        collectUrl: '',
+        collectSite: '',
+        siteName: '',
         goodsName: '',
         goodsCate: '',
         brandName: '',
-        collectSite: '',
         priceStdCd: '',
         price: '',
         sitePrice: '',
@@ -15,9 +17,7 @@ class ColtItem {
         sizeOption: '',
         styleOption: '',
         giftOption: '',
-        collectUrl: '',
         bestItemYn: 0,
-        siteName: '',
         addInfo: '',
         maftOrigin: '',
         materials: '',
