@@ -1,0 +1,34 @@
+{
+  "name": "acq_node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://jeongdayoung36@bitbucket.org/epopcon/acq_node.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.1",
+    "cheerio": "1.0.0-rc.3",
+    "cluster": "0.7.7",
+    "express": "^4.18.2",
+    "express-generator": "^4.16.1",
+    "pm2": "^4.5.0",
+    "puppeteer": "18.1.0",
+    "puppeteer-extra": "^3.3.4",
+    "puppeteer-extra-plugin-stealth": "^2.11.0",
+    "sharp": "0.27.1",
+    "statman-stopwatch": "2.11.1",
+    "winston": "3.3.3",
+    "winston-daily-rotate-file": "4.5.2"
+  },
+  "bugs": {
+    "url": "https://bitbucket.org/epopcon/acq_node/issues"
+  },
+  "homepage": "https://bitbucket.org/epopcon/acq_node#readme"
+}

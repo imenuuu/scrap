@@ -1,0 +1,17 @@
+{
+    "DETAIL_PUPPET_PROFILE" : "../../puppet_profile/detail",
+    "detail" : [
+        {
+            "COLLECT_SITE" : "lg.dns-shop.ru",
+            "CLASS_PATH" : "../site/detail/dns/DnsDetail"
+        },
+        {
+            "COLLECT_SITE" : "top.gsshop.com",
+            "CLASS_PATH" : "../site/detail/gsshop/GsshopDetail"
+        }
+        
+    ]
+
+    
+        
+}
