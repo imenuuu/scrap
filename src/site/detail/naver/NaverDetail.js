@@ -43,6 +43,9 @@ class NaverDetail {
 
         let title = detailPage('title').text();
         logger.info('title: ' + title)
+        cItem.ColtItem.collectSite = this.collectSite;
+        cItem.ColtItem.collectUrl = url;
+        cItem.ColtItem.siteName = 'Naverstore';
         cItem.ColtItem.goodsName = title
 
         page.close();
