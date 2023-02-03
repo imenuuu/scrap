@@ -11,8 +11,8 @@ const validator = require('./src/util/ValidatorUtil')
 
 async function launch(){
     await appSetting(app);
-    // let collectSite = 'lg.dns-shop.ru'
-    // let url = 'https://www.dns-shop.ru/product/bc1a04cebd603330/holodilnik-s-morozilnikom-birusa-m120-serebristyj/'
+    // let collectSite = 'top.naverstore.com'
+    // let url = 'https://smartstore.naver.com/americanapparel/products/2536670070'
     // let CLASS_PATH = validator.validateClassPath(service.detail, collectSite)
     // let task = new detailTask(collectSite, CLASS_PATH, chromeConfig);
     // let item = await task.execute(url);

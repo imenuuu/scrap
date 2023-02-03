@@ -6,6 +6,10 @@
             "CLASS_PATH" : "../site/detail/dns/DnsDetail"
         },
         {
+            "COLLECT_SITE" : "top.naverstore.com",
+            "CLASS_PATH" : "../site/detail/naver/NaverDetail"
+        },
+        {
             "COLLECT_SITE" : "top.gsshop.com",
             "CLASS_PATH" : "../site/detail/gsshop/GsshopDetail"
         }
