@@ -12,7 +12,7 @@ const {del} = require("express/lib/application");
 
 const urls = {};
 const priorities = {};
-const queueLength = 1;
+const queueLength = 10;
 
 function sleep(ms) {
     return new Promise((resolve) => {
