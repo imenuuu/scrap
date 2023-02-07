@@ -11,11 +11,13 @@ class NaverDetail {
         global = this._glbConfig;
         this.collectSite = collectSite;
         this.luminati_zone = 'lum-customer-epopcon-zone-zone1';
+        this.OXYLABS = service.OXYLABS;
+        this.LUMINATI = service.LUMINATI;
     }
 
     async extractFromItemList(url) {
         try {
-
+            
             const item = await this.extractItemDetail(url)
 
             return item;
@@ -30,6 +32,15 @@ class NaverDetail {
         const browser = await puppeteer.launch(global);
         const page = await browser.newPage();
         await this.pageSet(page);
+                
+        if(this.OXYLABS){
+            let ipList = await this.getIpList(page);
+            let random = Math.floor(Math.random() * (ipList.length));
+            let ip = ipList[random].IP;
+            logger.info('ip : ' + ip);
+            global.args.push('--proxy-server=' + ip);
+        }
+
         try {
             await page.goto(url, { waitUntil: "networkidle2" }, {timeout: 30000});
 
@@ -48,13 +59,16 @@ class NaverDetail {
         cItem.ColtItem.siteName = 'Naverstore';
         cItem.ColtItem.goodsName = title
 
+        if(this.OXYLABS){
+            global.args.pop()
+        }
         page.close();
         browser.close();
         return cItem;
         
     }
 
-    async  pageSet(page) {
+    async pageSet(page) {
         await page.evaluateOnNewDocument(() => {
             Object.defineProperty(navigator, 'webdriver', {
                 get: () => false
@@ -62,14 +76,39 @@ class NaverDetail {
         });
     
         await page.setDefaultTimeout(50000000);
-        await page.authenticate({
-            username:  this.luminati_zone,
-            password: 'jhwfsy8ucuh2'
-        })
+        
+        if(this.OXYLABS){
+            await page.authenticate({
+                username:  'epopcon',
+                password: 'FChB5uEd45',
+                key: '4b33bfee-80a6-11eb-927e-901b0ec4424b'
+            })
+        }
+
+        if(this.LUMINATI){
+            await page.authenticate({
+                username:  this.luminati_zone,
+                password: 'jhwfsy8ucuh2'
+            })
+        }
+        
     
         await page.setDefaultNavigationTimeout(30000);
         await page.setDefaultTimeout(30000);
         await page.setUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36");
+    }
+
+    async getIpList(page){
+        let response = await page.goto(service.OXYLABS_URL)
+        let jsonArr = JSON.parse(await response.text())
+
+        let ipList = [];
+        for(let json of jsonArr){
+            let ip = json.ip 
+            let port = json.port
+            ipList.push(ip + ':' +port);
+        }
+        return ipList;
     }
 
 }
