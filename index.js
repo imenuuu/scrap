@@ -30,7 +30,7 @@ async function launch() {
     await appSetting(app);
     // let collectSite = 'top.naverstore.com'
     // let url = 'https://smartstore.naver.com/americanapparel/products/2536670070'
-    // let CLASS_PAT/**/H = validator.validateClassPath(service.detail, collectSite)
+    // let CLASS_PATH = validator.validateClassPath(service.detail, collectSite)
     // let task = new detailTask(collectSite, CLASS_PATH, chromeConfig);
     // let item = await task.execute(url);
     // logger.info(`item: ${item}`)

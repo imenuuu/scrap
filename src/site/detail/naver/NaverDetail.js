@@ -4,6 +4,8 @@ const ColtItem = require('../../../dto/ColtItem');
 const logger = require('../../../config/logger/Logger');
 const service = require('../../../config/service.json');
 
+const http = require('http');
+
 class NaverDetail {
     constructor(config, collectSite) {
         this._glbConfig = config;
@@ -33,13 +35,6 @@ class NaverDetail {
         const page = await browser.newPage();
         await this.pageSet(page);
                 
-        if(this.OXYLABS){
-            let ipList = await this.getIpList(page);
-            let random = Math.floor(Math.random() * (ipList.length));
-            let ip = ipList[random].IP;
-            logger.info('ip : ' + ip);
-            global.args.push('--proxy-server=' + ip);
-        }
 
         try {
             await page.goto(url, { waitUntil: "networkidle2" }, {timeout: 30000});
@@ -68,6 +63,7 @@ class NaverDetail {
         
     }
 
+
     async pageSet(page) {
         await page.evaluateOnNewDocument(() => {
             Object.defineProperty(navigator, 'webdriver', {
@@ -83,6 +79,13 @@ class NaverDetail {
                 password: 'FChB5uEd45',
                 key: '4b33bfee-80a6-11eb-927e-901b0ec4424b'
             })
+
+            let ipList = await this.getIpList(page);
+            
+            let random = Math.floor(Math.random() * (ipList.length));
+            let ip = ipList[random].IP;
+            logger.info('ip : ' + ip);
+            global.args.push('--proxy-server=' + ip);
         }
 
         if(this.LUMINATI){
@@ -90,6 +93,8 @@ class NaverDetail {
                 username:  this.luminati_zone,
                 password: 'jhwfsy8ucuh2'
             })
+
+            global.args.push('--proxy-server=zproxy.lum-superproxy.io:22225');
         }
         
     
