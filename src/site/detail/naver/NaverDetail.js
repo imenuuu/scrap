@@ -79,13 +79,6 @@ class NaverDetail {
                 password: 'FChB5uEd45',
                 key: '4b33bfee-80a6-11eb-927e-901b0ec4424b'
             })
-
-            let ipList = await this.getIpList(page);
-            
-            let random = Math.floor(Math.random() * (ipList.length));
-            let ip = ipList[random].IP;
-            logger.info('ip : ' + ip);
-            global.args.push('--proxy-server=' + ip);
         }
 
         if(this.LUMINATI){
@@ -101,19 +94,6 @@ class NaverDetail {
         await page.setDefaultNavigationTimeout(30000);
         await page.setDefaultTimeout(30000);
         await page.setUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36");
-    }
-
-    async getIpList(page){
-        let response = await page.goto(service.OXYLABS_URL)
-        let jsonArr = JSON.parse(await response.text())
-
-        let ipList = [];
-        for(let json of jsonArr){
-            let ip = json.ip 
-            let port = json.port
-            ipList.push(ip + ':' +port);
-        }
-        return ipList;
     }
 
 }
