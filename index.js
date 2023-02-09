@@ -14,6 +14,7 @@ const urls = {};
 const priorities = {};
 const queueLength = 1;
 
+let cnt = 0;
 function sleep(ms) {
     return new Promise((resolve) => {
         setTimeout(resolve, ms);
@@ -59,7 +60,7 @@ async function launch() {
             try {
                 let CLASS_PATH = validator.validateClassPath(service.detail, collectSite);
                 let task = new detailTask(collectSite, CLASS_PATH, chromeConfig);
-                item = await task.execute(url);
+                item = await task.execute(url, cnt++);
             } catch (e) {
                 logger.error("detailTask error", e);
             }

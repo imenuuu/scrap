@@ -2,7 +2,6 @@ const logger = require('../config/logger/Logger')
 
 const puppeteer = require('puppeteer');
 const service = require('../config/service.json');
-
 class DetailTask{
     constructor(collectSite, dirName, chromeConfig){
         this._collectSite = collectSite;
@@ -10,20 +9,19 @@ class DetailTask{
         this._config = chromeConfig;
     }
 
-    async execute(url){
+    async execute(url, cnt){
         let ip;
+    
         if(service.OXYLABS){
             const browser = await puppeteer.launch();
             const page = await browser.newPage();
             await this.pageSet(page);
             let ipList = await this.getIpList(page);
-            // page.close();
-            // browser.close();
-            let random = Math.floor(Math.random() * (ipList.length)); //atomic
-            ip = ipList[random];
+            let mod = (cnt % ipList.length)
+            ip = ipList[mod];
             this._config.args.push('--proxy-server=' + ip);
+            //logger.info(`ip : ${ip}`);
         }
-
 
         let detailClass = require(`${this._dirName}`)
         let detail = new detailClass(this._config, this._collectSite);
