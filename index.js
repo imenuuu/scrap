@@ -15,6 +15,7 @@ const priorities = {};
 const queueLength = 1;
 
 let cnt = 0;
+
 function sleep(ms) {
     return new Promise((resolve) => {
         setTimeout(resolve, ms);
@@ -48,8 +49,21 @@ async function launch() {
                     break;
                 }
 
+                if (Object.keys(priorities).length > 10) {
+                    delete priorities[key];
+
+                    let message = `CollectSite ${collectSite}, too many request, ${Object.keys(priorities).length}`;
+                    res.send({
+                        result: message,
+                        item: null
+                    });
+
+                    logger.info(message);
+                    return;
+                }
+
                 await sleep(1000);
-                console.log(`queue is full, length: ${Object.keys(urls).length}, ${Object.keys(priorities).length}`);
+                logger.info(`queue is full, length: ${Object.keys(urls).length}, ${Object.keys(priorities).length}`);
             }
             delete priorities[key];
             urls[key] = key;
@@ -73,8 +87,8 @@ async function launch() {
             });
 
             delete urls[key];
-        } catch (e){
-            logger.error('post error', e)
+        } catch (e) {
+            logger.error('post error', e);
         }
     });
 
