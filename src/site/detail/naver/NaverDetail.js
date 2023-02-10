@@ -7,7 +7,7 @@ const service = require('../../../config/service.json');
 const http = require('http');
 
 class NaverDetail {
-    constructor(config, collectSite) {
+    constructor(config, collectSite, cnt) {
         this._glbConfig = config;
         this._glbConfig.userDataDir = service.DETAIL_PUPPET_PROFILE;
         global = this._glbConfig;
@@ -15,6 +15,7 @@ class NaverDetail {
         this.luminati_zone = 'lum-customer-epopcon-zone-zone1';
         this.OXYLABS = service.OXYLABS;
         this.LUMINATI = service.LUMINATI;
+        this.cnt = cnt;
     }
 
     async extractFromItemList(url) {
@@ -34,6 +35,12 @@ class NaverDetail {
         const browser = await puppeteer.launch(global);
         const page = await browser.newPage();
         await this.pageSet(page);
+        if(this.OXYLABS){
+            let ipList = await this.getIpList(page);
+            let mod = (this.cnt % ipList.length)
+            let ip = ipList[mod];
+            global.args.push('--proxy-server=' + ip);
+        }
                 
 
         try {
@@ -94,6 +101,19 @@ class NaverDetail {
         await page.setDefaultNavigationTimeout(30000);
         await page.setDefaultTimeout(30000);
         await page.setUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36");
+    }
+
+    async getIpList(page){
+        let response = await page.goto(service.OXYLABS_URL)
+        let jsonArr = JSON.parse(await response.text())
+
+        let ipList = [];
+        for(let json of jsonArr){
+            let ip = json.ip 
+            let port = json.port
+            ipList.push(ip + ':' +port);
+        }
+        return ipList;
     }
 
 }

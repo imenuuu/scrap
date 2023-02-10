@@ -75,6 +75,7 @@ async function launch() {
                 let CLASS_PATH = validator.validateClassPath(service.detail, collectSite);
                 let task = new detailTask(collectSite, CLASS_PATH, chromeConfig);
                 item = await task.execute(url, cnt++);
+                cnt  = cnt > 300 ? 0 : cnt;
             } catch (e) {
                 logger.error("detailTask error", e);
             }

@@ -12,7 +12,7 @@ let ipList;
 let global;
 
 class DnsDetail {
-    constructor(config, collectSite) {
+    constructor(config, collectSite, cnt) {
         this._glbConfig = config;
         this._glbConfig.userDataDir = service.DETAIL_PUPPET_PROFILE;
         global = this._glbConfig;
@@ -20,6 +20,7 @@ class DnsDetail {
         this.OXYLABS = service.OXYLABS;
         this.LUMINATI = service.LUMINATI;
         this.luminati_zone = 'lum-customer-epopcon-zone-zone_ru';
+        this.cnt = cnt;
     }
 
     async extractFromItemList(url) {
@@ -38,6 +39,12 @@ class DnsDetail {
         let context = await browser.createIncognitoBrowserContext();
         const page = await context.newPage();
         await this.pageSet(page);
+        if(this.OXYLABS){
+            let ipList = await this.getIpList(page);
+            let mod = (this.cnt % ipList.length)
+            let ip = ipList[mod];
+            global.args.push('--proxy-server=' + ip);
+        }
        
         try {
             try {
@@ -128,6 +135,19 @@ class DnsDetail {
             page.close();
             browser.close();
         }
+    }
+
+    async getIpList(page){
+        let response = await page.goto(service.OXYLABS_URL)
+        let jsonArr = JSON.parse(await response.text())
+
+        let ipList = [];
+        for(let json of jsonArr){
+            let ip = json.ip 
+            let port = json.port
+            ipList.push(ip + ':' +port);
+        }
+        return ipList;
     }
 
     async getStockInfo(cItem, page, detailPage, url, optionList, product_code, ivtAddPrice){
