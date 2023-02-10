@@ -32,15 +32,19 @@ class NaverDetail {
     }
     
     async extractItemDetail(url) {
-        const browser = await puppeteer.launch(global);
-        const page = await browser.newPage();
-        await this.pageSet(page);
         if(this.OXYLABS){
-            let ipList = await this.getIpList(page);
+            
+            let ipList = await this.getIpList();
             let mod = (this.cnt % ipList.length)
             let ip = ipList[mod];
             global.args.push('--proxy-server=' + ip);
+            logger.info(ip)
+            
         }
+
+        const browser = await puppeteer.launch(global);
+        const page = await browser.newPage();
+        await this.pageSet(page);
                 
 
         try {
@@ -103,9 +107,19 @@ class NaverDetail {
         await page.setUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36");
     }
 
-    async getIpList(page){
-        let response = await page.goto(service.OXYLABS_URL)
+    async getIpList(){
+        let browserOxylab = await puppeteer.launch(global);
+        let pageOxylab = await browserOxylab.newPage();
+        await pageOxylab.authenticate({
+            username:  'epopcon',
+            password: 'FChB5uEd45',
+            key: '4b33bfee-80a6-11eb-927e-901b0ec4424b'
+        })
+        let response = await pageOxylab.goto(service.OXYLABS_URL)
         let jsonArr = JSON.parse(await response.text())
+
+        pageOxylab.close();
+        browserOxylab.close();
 
         let ipList = [];
         for(let json of jsonArr){

@@ -35,16 +35,17 @@ class DnsDetail {
     }
 
     async extractItemDetail(url, collectSite) {
-        const browser = await puppeteer.launch(global);
-        let context = await browser.createIncognitoBrowserContext();
-        const page = await context.newPage();
-        await this.pageSet(page);
-        if(this.OXYLABS){
-            let ipList = await this.getIpList(page);
+         if(this.OXYLABS){
+            let ipList = await this.getIpList();
             let mod = (this.cnt % ipList.length)
             let ip = ipList[mod];
             global.args.push('--proxy-server=' + ip);
         }
+        const browser = await puppeteer.launch(global);
+        let context = await browser.createIncognitoBrowserContext();
+        const page = await context.newPage();
+        await this.pageSet(page);
+       
        
         try {
             try {
@@ -137,9 +138,19 @@ class DnsDetail {
         }
     }
 
-    async getIpList(page){
-        let response = await page.goto(service.OXYLABS_URL)
+    async getIpList(){
+        let browserOxylab = await puppeteer.launch(global);
+        let pageOxylab = await browserOxylab.newPage();
+        await pageOxylab.authenticate({
+            username:  'epopcon',
+            password: 'FChB5uEd45',
+            key: '4b33bfee-80a6-11eb-927e-901b0ec4424b'
+        })
+        let response = await pageOxylab.goto(service.OXYLABS_URL)
         let jsonArr = JSON.parse(await response.text())
+
+        pageOxylab.close();
+        browserOxylab.close();
 
         let ipList = [];
         for(let json of jsonArr){
