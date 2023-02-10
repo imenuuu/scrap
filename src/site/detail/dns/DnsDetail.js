@@ -41,6 +41,10 @@ class DnsDetail {
             let ip = ipList[mod];
             global.args.push('--proxy-server=' + ip);
         }
+        if(this.LUMINATI){
+            global.args.push('--proxy-server=zproxy.lum-superproxy.io:22225');
+        }
+
         const browser = await puppeteer.launch(global);
         let context = await browser.createIncognitoBrowserContext();
         const page = await context.newPage();
@@ -543,7 +547,6 @@ class DnsDetail {
                 username:  this.luminati_zone,
                 password: 'jhwfsy8ucuh2'
             })
-            global.args.push('--proxy-server=zproxy.lum-superproxy.io:22225');
         }
     
         await page.setDefaultTimeout(50000000);

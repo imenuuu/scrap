@@ -33,13 +33,14 @@ class NaverDetail {
     
     async extractItemDetail(url) {
         if(this.OXYLABS){
-            
             let ipList = await this.getIpList();
             let mod = (this.cnt % ipList.length)
             let ip = ipList[mod];
             global.args.push('--proxy-server=' + ip);
-            logger.info(ip)
-            
+        }
+        
+        if(this.LUMINATI){
+            global.args.push('--proxy-server=zproxy.lum-superproxy.io:22225');
         }
 
         const browser = await puppeteer.launch(global);
@@ -98,7 +99,7 @@ class NaverDetail {
                 password: 'jhwfsy8ucuh2'
             })
 
-            global.args.push('--proxy-server=zproxy.lum-superproxy.io:22225');
+            
         }
         
     

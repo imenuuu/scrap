@@ -14,8 +14,6 @@ var args = [
     ,'--disable-features=IsolateOrigins,site-per-process'
     ,'--disable-blink-features=AutomationControlled'
     ,'--window-size=1920,1080'
-    //,'--proxy-server=zproxy.lum-superproxy.io:22225'
-    // ,'--proxy-server=14.63.194.174:8080'
 ]
 
 exports.options = {
