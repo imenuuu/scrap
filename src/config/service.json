@@ -1,7 +1,7 @@
 {
-    "OXYLABS" : true,
+    "OXYLABS" : false,
     "OXYLABS_URL" : "https://api.oxylabs.io/v1/proxies/lists/4b33bfee-80a6-11eb-927e-901b0ec4424b",
-    "LUMINATI" : false,
+    "LUMINATI" : true,
     "DETAIL_PUPPET_PROFILE" : "../../puppet_profile/detail",
     "detail" : [
         {
@@ -15,6 +15,10 @@
         {
             "COLLECT_SITE" : "top.gsshop.com",
             "CLASS_PATH" : "../site/detail/gsshop/GsshopDetail"
+        },
+        {
+            "COLLECT_SITE" : "lg.datart.cz",
+            "CLASS_PATH" : "../site/detail/datart/DatartDetail"
         }
         
     ]
