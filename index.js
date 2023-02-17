@@ -37,7 +37,7 @@ async function launch() {
     // let item = await task.execute(url);
     // logger.info(`item: ${item}`)
 
-    app.post('/detail', async (req, res) => {
+    app.post('/acq/node/detail', async (req, res) => {
         try {
             const collectSite = req.body.collectSite;
             const url = req.body.url;
