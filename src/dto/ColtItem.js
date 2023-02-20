@@ -1,44 +1,42 @@
-const { currentDate, currentDay, collectDay } = require("../util/Dateutil");
+const {currentDate, currentDay, collectDay} = require("../util/Dateutil");
 
 
 class ColtItem {
-    ColtItem = {
-        itemNum: '',
-        collectUrl: '',
-        collectSite: '',
-        siteName: '',
-        goodsName: '',
-        goodsCate: '',
-        brandName: '',
-        priceStdCd: '',
-        price: '',
-        sitePrice: '',
-        colorOption: '',
-        sizeOption: '',
-        styleOption: '',
-        giftOption: '',
-        bestItemYn: 0,
-        addInfo: '',
-        maftOrigin: '',
-        materials: '',
-        tag: '',
-        volume: '',
-        type: '',
-        orgUrl: '',
-        orgMaftDt: '',
-        maftDt: '',
-        orgGoodsNum: '',
-        trustSeller: '',
-        useWay: 'A',
-        fivePoint: '',
-        totalEvalCnt: '',
-        status: 1,
-        eventYn : '',
-        regDt : '',
-        uptDt : ''
-    }
+    itemNum = '';
+    collectUrl = '';
+    collectSite = '';
+    siteName = '';
+    goodsName = '';
+    goodsCate = '';
+    brandName = '';
+    priceStdCd = '';
+    price = '';
+    sitePrice = '';
+    colorOption = '';
+    sizeOption = '';
+    styleOption = '';
+    giftOption = '';
+    bestItemYn = 0;
+    addInfo = '';
+    maftOrigin = '';
+    materials = '';
+    tag = '';
+    volume = '';
+    type = '';
+    orgUrl = '';
+    orgMaftDt = '';
+    maftDt = '';
+    orgGoodsNum = '';
+    trustSeller = '';
+    useWay = 'A';
+    fivePoint = '';
+    totalEvalCnt = '';
+    status = 1;
+    eventYn = '';
+    regDt = '';
+    uptDt = '';
 
-    ColtImageList =[];
+    ColtImageList = [];
 
     ColtItemEvalutList = [];
 
@@ -65,4 +63,5 @@ class ColtItem {
     ColtItemIvtList = [];
 
 }
+
 module.exports = ColtItem;
