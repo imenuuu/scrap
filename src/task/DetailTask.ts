@@ -3,6 +3,9 @@ const logger = require('../config/logger/Logger')
 const puppeteer = require('puppeteer');
 const service = require('../config/service.json');
 class DetailTask{
+    private _collectSite: any;
+    private _dirName: any;
+    private _config: any;
     constructor(collectSite, dirName, chromeConfig){
         this._collectSite = collectSite;
         this._dirName = dirName;

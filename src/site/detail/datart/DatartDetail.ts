@@ -12,6 +12,13 @@ let ipList;
 let global;
 
 class DatartDetail {
+    private _glbConfig: any;
+    private collectSite: any;
+    private OXYLABS: any;
+    private LUMINATI: any;
+    private luminati_zone: any;
+    private cnt: any;
+
     constructor(config, collectSite, cnt) {
         this._glbConfig = config;
         this._glbConfig.userDataDir = service.DETAIL_PUPPET_PROFILE;
@@ -111,8 +118,8 @@ class DatartDetail {
                     price = oldPriceDiv.text().trim().replace(/[^0-9]/g, "")
                     price = Number(price)
                     let discountRate = Math.round((price - sitePrice) / price * 100)
-                    cItem.ColtItem.coltItemDiscount.discountPrice = sitePrice;
-                    cItem.ColtItem.coltItemDiscount.discountRate = discountRate;
+                    cItem.coltItemDiscount.discountPrice = sitePrice;
+                    cItem.coltItemDiscount.discountRate = discountRate;
                 } else {
                     price = sitePrice
                 }
@@ -188,27 +195,27 @@ class DatartDetail {
             } else {
                 ivt.ColtItemIvt.option = "In stock";
             }
-            cItem.ColtItem.coltItemIvtList.push(ivt);
+            cItem.coltItemIvtList.push(ivt);
         } catch (error) {
             logger.error("optionError : " + error)
         }
     }
 
-    async makeColtItem(cItem, url, collectSite,  title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice){
-        cItem.ColtItem.collectSite = collectSite;
-        cItem.ColtItem.collectUrl = url;
-        cItem.ColtItem.siteName = 'Datart';
-        cItem.ColtItem.priceStdCd = '018';
+    async makeColtItem(cItem: ColtItem, url, collectSite,  title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice){
+        cItem.collectSite = collectSite;
+        cItem.collectUrl = url;
+        cItem.siteName = 'Datart';
+        cItem.priceStdCd = '018';
     
-        cItem.ColtItem.itemNum = item_num;
-        cItem.ColtItem.goodsName = title;
-        cItem.ColtItem.goodsCate = category;
-        cItem.ColtItem.brandName = brand_name;
-        cItem.ColtItem.price = orgPrice;
-        cItem.ColtItem.sitePrice = orgPrice;
-        cItem.ColtItem.totalEvalCnt = totalEvalutCnt;
-        cItem.ColtItem.fivePoint = avgPoint;
-        cItem.ColtItem.addInfo = addInfo;
+        cItem.itemNum = item_num;
+        cItem.goodsName = title;
+        cItem.goodsCate = category;
+        cItem.brandName = brand_name;
+        cItem.price = orgPrice;
+        cItem.sitePrice = orgPrice;
+        cItem.totalEvalCnt = totalEvalutCnt;
+        cItem.fivePoint = avgPoint;
+        cItem.addInfo = addInfo;
     }
     
     async getAddInfo(page, itemKod) {
@@ -260,14 +267,14 @@ class DatartDetail {
                     const coltImage = new ColtImage();
                     coltImage.ColtImage.goodsImage = imageUrl;
                     coltImage.ColtImage.hash = hash.toHash(imageUrl);
-                    cItem.ColtItem.coltImageList.push(coltImage);
+                    cItem.coltImageList.push(coltImage);
                 }            
             });
             for(let videoUrl of videoList){
                 const coltImage = new ColtImage();
                 coltImage.ColtImage.goodsImage = videoUrl;
                 coltImage.ColtImage.hash = hash.toHash(videoUrl);
-                cItem.ColtItem.coltImageList.push(coltImage);
+                cItem.coltImageList.push(coltImage);
             }
         } catch (error) {
             logger.error("imageError : " + error)
@@ -349,4 +356,5 @@ async function parseCheck(page, selector){
 
 
 
-module.exports = DatartDetail;
+module.exports = DatartDetail
+export {DatartDetail};
