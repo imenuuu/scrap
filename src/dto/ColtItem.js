@@ -1,15 +1,17 @@
-const { currentDate, currentDay, collectDay } = require("../util/Dateutil");
+const {currentDate, currentDay, collectDay} = require("../util/Dateutil");
 
 
 class ColtItem {
     ColtItem = {
+        orgGoodsNum: '',
         itemNum: '',
-        collectUrl: '',
-        collectSite: '',
-        siteName: '',
         goodsName: '',
         goodsCate: '',
         brandName: '',
+        maftDt: '',
+        orgMaftDt: '',
+        maftOrigin: '',
+        collectSite: '',
         priceStdCd: '',
         price: '',
         sitePrice: '',
@@ -17,52 +19,48 @@ class ColtItem {
         sizeOption: '',
         styleOption: '',
         giftOption: '',
+        collectUrl: '',
         bestItemYn: 0,
-        addInfo: '',
-        maftOrigin: '',
+        siteName: '',
         materials: '',
-        tag: '',
+        addInfo: '',
         volume: '',
+        tag: '',
         type: '',
-        orgUrl: '',
-        orgMaftDt: '',
-        maftDt: '',
-        orgGoodsNum: '',
-        trustSeller: '',
-        useWay: 'A',
         fivePoint: '',
         totalEvalCnt: '',
+        orgUrl: '',
+        trustSeller: '',
+        useWay: 'A',
         status: 1,
-        eventYn : '',
-        regDt : '',
-        uptDt : ''
-    }
+        eventYn: '',
+        regDt: '',
+        uptDt: '',
 
-    ColtImageList =[];
+        coltItemIvtList: [],
+        coltItemDiscount: {
+            itemId: 0,
+            collectDay: '',
+            option: '',
+            discountPrice: '',
+            discountRate: '',
+            regDt: ''
+        },
+        coltItemEvalutList: [],
+        coltImageList: [],
 
-    ColtItemEvalutList = [];
+        coltItemSiteSellHis: {
+            itemNum: '',
+            collectSite: '',
+            bundleItemYn: -1,
+            purCnt: '',
+            likeCnt: -1,
+            lookCnt: -1,
+            regDt: ''
+        }
+    };
 
-    ColtItemDiscount = {
-        itemId: 0,
-        collectDay: '',
-        option: '',
-        discountPrice: '',
-        discountRate: '',
-        regDt: ''
-    }
-
-    ColtItemSiteSellHis = {
-        itemNum: '',
-        collectSite: '',
-        bundleItemYn: -1,
-        purCnt: '',
-        likeCnt: -1,
-        lookCnt: -1,
-        regDt: ''
-    }
-
-
-    ColtItemIvtList = [];
 
 }
+
 module.exports = ColtItem;

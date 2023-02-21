@@ -108,8 +108,8 @@ class DnsDetail {
             if(disPrice > 0){
                 ivtAddPrice = disPrice;
                 let discountRate = Math.round((orgPrice - disPrice) / orgPrice * 100)
-                cItem.ColtItemDiscount.discountPrice = disPrice;
-                cItem.ColtItemDiscount.discountRate = discountRate;
+                cItem.ColtItem.coltItemDiscount.discountPrice = disPrice;
+                cItem.ColtItem.coltItemDiscount.discountRate = discountRate;
             }
     
             await this.makeColtItem(cItem, url, collectSite, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice);
@@ -127,7 +127,7 @@ class DnsDetail {
                 const coltImage = new ColtImage();
                 coltImage.ColtImage.goodsImage = image;
                 coltImage.ColtImage.hash = hash.toHash(image);
-                cItem.ColtImageList.push(coltImage);
+                cItem.ColtItem.coltImageList.push(coltImage);
             });
         
     
@@ -242,7 +242,7 @@ class DnsDetail {
         ivt.ColtItemIvt.giftOption = option4;
         ivt.ColtItemIvt.option = stockOption;
         ivt.ColtItemIvt.stockAmount = stockAmout;
-        cItem.ColtItemIvtList.push(ivt);
+        cItem.ColtItem.coltItemIvtList.push(ivt);
     }
     
     async requestAddCart(detailPage, page, product_code, url){
@@ -358,14 +358,14 @@ class DnsDetail {
             const coltImage = new ColtImage();
             coltImage.ColtImage.goodsImage = image;
             coltImage.ColtImage.hash = hash.toHash(image);
-            cItem.ColtImageList.push(coltImage);
+            cItem.ColtItem.coltImageList.push(coltImage);
     
             const ivt = new ColtIvt();
             ivt.ColtItemIvt.stockId = item_num;
             ivt.ColtItemIvt.addPrice = 0;
             ivt.ColtItemIvt.option = 'Not Found';
             ivt.ColtItemIvt.stockAmount = -999;
-            cItem.ColtItemIvtList.push(ivt);     
+            cItem.ColtItem.coltItemIvtList.push(ivt);
     
             logger.info('Not Found Page! , ITEM_NUM: '+ item_num);
             

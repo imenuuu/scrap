@@ -111,8 +111,8 @@ class DatartDetail {
                     price = oldPriceDiv.text().trim().replace(/[^0-9]/g, "")
                     price = Number(price)
                     let discountRate = Math.round((price - sitePrice) / price * 100)
-                    cItem.ColtItemDiscount.discountPrice = sitePrice;
-                    cItem.ColtItemDiscount.discountRate = discountRate;
+                    cItem.ColtItem.coltItemDiscount.discountPrice = sitePrice;
+                    cItem.ColtItem.coltItemDiscount.discountRate = discountRate;
                 } else {
                     price = sitePrice
                 }
@@ -188,7 +188,7 @@ class DatartDetail {
             } else {
                 ivt.ColtItemIvt.option = "In stock";
             }
-            cItem.ColtItemIvtList.push(ivt);
+            cItem.ColtItem.coltItemIvtList.push(ivt);
         } catch (error) {
             logger.error("optionError : " + error)
         }
@@ -260,14 +260,14 @@ class DatartDetail {
                     const coltImage = new ColtImage();
                     coltImage.ColtImage.goodsImage = imageUrl;
                     coltImage.ColtImage.hash = hash.toHash(imageUrl);
-                    cItem.ColtImageList.push(coltImage);
+                    cItem.ColtItem.coltImageList.push(coltImage);
                 }            
             });
             for(let videoUrl of videoList){
                 const coltImage = new ColtImage();
                 coltImage.ColtImage.goodsImage = videoUrl;
                 coltImage.ColtImage.hash = hash.toHash(videoUrl);
-                cItem.ColtImageList.push(coltImage);
+                cItem.ColtItem.coltImageList.push(coltImage);
             }
         } catch (error) {
             logger.error("imageError : " + error)
