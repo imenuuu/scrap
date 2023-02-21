@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const ColtItem = require('../../../dto/ColtItem');
 const ColtIvt = require('../../../dto/ColtItemIvt');
+const ColtDiscount = require('../../../dto/ColtItemDiscount')
 const ColtImage = require('../../../dto/ColtImage');
 const hash = require('../../../util/HashUtil');
 const { jsonToStr, strToJson } = require('../../../util/Jsonutil');
@@ -106,10 +107,12 @@ class DnsDetail {
             if(Object.is(disPrice, NaN)) disPrice = 0;
             let ivtAddPrice = orgPrice;
             if(disPrice > 0){
+                const coltDis = new ColtDiscount()
                 ivtAddPrice = disPrice;
                 let discountRate = Math.round((orgPrice - disPrice) / orgPrice * 100)
-                cItem.ColtItem.coltItemDiscount.discountPrice = disPrice;
-                cItem.ColtItem.coltItemDiscount.discountRate = discountRate;
+                coltDis.ColtItemDiscount.discountPrice = disPrice;
+                coltDis.ColtItemDiscount.discountRate = discountRate;
+                cItem.ColtItem.coltItemDiscount.push(coltDis)
             }
     
             await this.makeColtItem(cItem, url, collectSite, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice);

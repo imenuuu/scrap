@@ -38,14 +38,7 @@ class ColtItem {
         uptDt: '',
 
         coltItemIvtList: [],
-        coltItemDiscount: {
-            itemId: 0,
-            collectDay: '',
-            option: '',
-            discountPrice: '',
-            discountRate: '',
-            regDt: ''
-        },
+        coltItemDiscount: [],
         coltItemEvalutList: [],
         coltImageList: [],
 
@@ -59,8 +52,6 @@ class ColtItem {
             regDt: ''
         }
     };
-
-
 }
 
 module.exports = ColtItem;
