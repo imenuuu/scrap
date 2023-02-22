@@ -1,5 +1,6 @@
+import {DetailTask} from "./src/task/DetailTask";
+
 const logger = require('./src/config/logger/Logger');
-const detailTask = require('./src/task/DetailTask');
 const express = require('express');
 const app = express();
 const port = 8005;
@@ -8,7 +9,6 @@ const bodyParser = require('body-parser');
 const chromeConfig = require('./src/config/chrome/ChromeConfig').options;
 const service = require('./src/config/service.json');
 const validator = require('./src/util/ValidatorUtil');
-const {del} = require("express/lib/application");
 const ColtItem = require("./src/dto/ColtItem");
 
 const API_PATH = '/acq/node/detail';
@@ -104,10 +104,11 @@ function sendErrorResponse(res, e: Error) {
     await appSetting(app);
 
     app.post(API_PATH, async (req, res) => {
+        let key = '';
         try {
             const collectSite = req.body.collectSite;
             const url = req.body.url;
-            let key = `${collectSite}==${url}`;
+            key = `${collectSite}==${url}`;
             if (!await waitQueue(key, collectSite, res)) {
                 return;
             }
@@ -115,12 +116,13 @@ function sendErrorResponse(res, e: Error) {
             let item = null;
             try {
                 let CLASS_PATH = validator.validateClassPath(service.detail, collectSite);
-                let task = new detailTask(collectSite, CLASS_PATH, chromeConfig);
+                let task = new DetailTask(collectSite, CLASS_PATH, chromeConfig);
                 item = await task.execute(url, cnt++);
                 cnt = cnt > 300 ? 0 : cnt;
             } catch (e) {
                 logger.error("detailTask error", e);
                 sendErrorResponse(res, e);
+                delete urls[key];
                 return
             }
 
@@ -131,9 +133,13 @@ function sendErrorResponse(res, e: Error) {
             });
 
             delete urls[key];
+            return
         } catch (e) {
             logger.error('post error', e);
             sendErrorResponse(res, e);
+            if (key !== '') {
+                delete urls[key]
+            }
             return
         }
     });
