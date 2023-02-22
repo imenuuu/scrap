@@ -80,6 +80,13 @@ function getClassType(item) {
     return null;
 }
 
+function sendErrorResponse(res, e: Error) {
+    res.send({
+        type: 'error',
+        message: e.message
+    });
+}
+
 /**
  * let collectSite = 'top.naverstore.com'
  * let url = 'https://smartstore.naver.com/americanapparel/products/2536670070'
@@ -113,6 +120,8 @@ function getClassType(item) {
                 cnt = cnt > 300 ? 0 : cnt;
             } catch (e) {
                 logger.error("detailTask error", e);
+                sendErrorResponse(res, e);
+                return
             }
 
             logger.info(`item: ${item}`);
@@ -124,6 +133,8 @@ function getClassType(item) {
             delete urls[key];
         } catch (e) {
             logger.error('post error', e);
+            sendErrorResponse(res, e);
+            return
         }
     });
 })()
