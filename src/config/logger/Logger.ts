@@ -1,3 +1,5 @@
+import type {Logger} from "winston";
+
 const { createLogger, format, transports } = require('winston');
 const fs = require('fs');
 const path = require('path');
@@ -12,7 +14,7 @@ if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir);
 }
 
-const logger = createLogger({
+const logger: Logger = createLogger({
   level: env === 'production' ? 'info' : 'debug',
   format: format.combine(
     format.label({ label: path.basename(process.mainModule.filename) }),
@@ -48,4 +50,5 @@ const logger = createLogger({
   ]
 });
 
-module.exports = logger;
+
+export = logger
