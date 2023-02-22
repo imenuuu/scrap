@@ -16,20 +16,20 @@ var args = [
     ,'--window-size=1920,1080'
 ]
 
-exports.options = {
+export const options = {
     args,
-    headless: false,
+    headless: true,
     ignoreHTTPSErrors: true,
     defaultViewport: null,
-    executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    // executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     //executablePath: "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe", //for window
     //executablePath: "/usr/bin/google-chrome-stable", //for deploy
 
-    userDataDir: '/Users/usr/git/wspider_node/puppet_profile/detail'
+    // userDataDir: '/Users/usr/git/wspider_node/puppet_profile/detail'
     // product: "chrome"
 };
 
-exports.navigatorSet = async function (page) {
+export async function navigatorSet (page) {
     await page.evaluateOnNewDocument(() => {
         Object.defineProperty(navigator, 'webdriver', {
             get: () => false
@@ -44,7 +44,7 @@ exports.navigatorSet = async function (page) {
             get: () => "a7224d0774f7bf628fe6fdf46640346c"
         })
 
-        window.navigator.chrome = {
+        window.navigator['chrome'] = {
             runtime: {}
         };
     
