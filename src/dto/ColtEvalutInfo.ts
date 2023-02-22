@@ -15,4 +15,4 @@ class ColtItemEvalutInfo{
     }
 }
 
-module.exports = ColtItemEvalutInfo;
+export {ColtItemEvalutInfo}

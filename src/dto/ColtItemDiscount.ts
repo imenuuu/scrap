@@ -9,4 +9,4 @@ class ColtItemDiscount {
     }
 }
 
-module.exports = ColtItemDiscount
+export {ColtItemDiscount}

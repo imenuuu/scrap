@@ -7,4 +7,5 @@ class ColtImage {
         regDt: ''
     }
 }
-module.exports = ColtImage;
+
+export {ColtImage}

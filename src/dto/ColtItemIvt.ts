@@ -13,4 +13,5 @@ class ColtItemIvt {
         regDt: ''
     }
 }
-module.exports = ColtItemIvt;
+
+export {ColtItemIvt}

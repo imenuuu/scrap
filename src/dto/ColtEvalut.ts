@@ -1,4 +1,3 @@
-const { currentDate} = require("../util/Dateutil");
 
 class ColtItemEvalut {
     ColtItemEvalut = {
@@ -13,4 +12,4 @@ class ColtItemEvalut {
     ColtItemEvalutInfo = {};
 }
 
-module.exports = ColtItemEvalut;
+export {ColtItemEvalut}
