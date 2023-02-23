@@ -3,6 +3,7 @@ import {ColtItem} from "../../../dto/ColtItem";
 import {ColtImage} from "../../../dto/ColtImage";
 import {ColtItemDiscount} from "../../../dto/ColtItemDiscount";
 import {ColtItemIvt} from "../../../dto/ColtItemIvt";
+import type {Detail} from "../Detail";
 
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
@@ -14,13 +15,13 @@ let ipCnt;
 let ipList;
 let global;
 
-class DnsDetail {
-    private _glbConfig: any;
-    private collectSite: any;
-    private OXYLABS: any;
-    private LUMINATI: any;
-    private luminati_zone: any;
-    private cnt: any;
+class DnsDetail implements Detail {
+    _glbConfig: { [key: string]: any; };
+    collectSite: string;
+    luminati_zone: string;
+    OXYLABS: boolean;
+    LUMINATI: boolean;
+    cnt: number;
 
     constructor(config, collectSite, cnt) {
         this._glbConfig = config;
@@ -33,7 +34,7 @@ class DnsDetail {
         this.cnt = cnt;
     }
 
-    async extractItemDetail(url, collectSite): Promise<ColtItem> {
+    async extractItemDetail(url): Promise<ColtItem> {
         try {
             if (this.OXYLABS) {
                 let ipList = await this.getIpList();
@@ -76,7 +77,7 @@ class DnsDetail {
                 const title = detailPage('h1.product-card-top__title').text();
                 const item_num = await this.getItemNum(url);
                 if (!await isNotUndefinedOrEmpty(title)) {
-                    await this.makeNotFoundColtItem(cItem, url, collectSite, item_num, detailPage);
+                    await this.makeNotFoundColtItem(cItem, url, this.collectSite, item_num, detailPage);
                     return cItem;
                 }
                 logger.info('ITEM_NUM: ' + item_num + ' TITLE:' + title);
@@ -114,7 +115,7 @@ class DnsDetail {
                     cItem.coltItemDiscountList.push(coltDis)
                 }
 
-                await this.makeColtItem(cItem, url, collectSite, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice);
+                await this.makeColtItem(cItem, url, this.collectSite, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice);
                 //--option--
                 let optionList = await this.getOptionInfo(detailPage);
 
