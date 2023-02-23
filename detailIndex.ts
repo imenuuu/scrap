@@ -117,8 +117,8 @@ function sendErrorResponse(res, e: Error) {
             let item = null;
             try {
 
-                let CLASS_PATH = validator.validateClassPath(service.detail, collectSite);
-                const task = new DetailTask(collectSite, CLASS_PATH, chromeConfig);
+                let classPath = validator.validateClassPath(service.detail, collectSite);
+                const task = new DetailTask(collectSite, classPath, chromeConfig);
                 item = await task.execute(url, cnt);
                 cnt = cnt > 300 ? 0 : cnt;
 

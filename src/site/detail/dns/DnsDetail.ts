@@ -1,11 +1,11 @@
 import * as constants from "constants";
+import {ColtItem} from "../../../dto/ColtItem";
+import {ColtImage} from "../../../dto/ColtImage";
+import {ColtItemDiscount} from "../../../dto/ColtItemDiscount";
+import {ColtItemIvt} from "../../../dto/ColtItemIvt";
 
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
-const ColtItem = require('../../../dto/ColtItem');
-const ColtIvt = require('../../../dto/ColtItemIvt');
-const ColtDiscount = require('../../../dto/ColtItemDiscount')
-const ColtImage = require('../../../dto/ColtImage');
 const hash = require('../../../util/HashUtil');
 const {jsonToStr, strToJson} = require('../../../util/Jsonutil');
 const logger = require('../../../config/logger/Logger');
@@ -33,124 +33,117 @@ class DnsDetail {
         this.cnt = cnt;
     }
 
-    async extractFromItemList(url) {
+    async extractItemDetail(url, collectSite): Promise<ColtItem> {
         try {
+            if (this.OXYLABS) {
+                let ipList = await this.getIpList();
+                let mod = (this.cnt % ipList.length)
+                let ip = ipList[mod];
+                global.args.push('--proxy-server=' + ip);
+            }
+            if (this.LUMINATI) {
+                global.args.push('--proxy-server=zproxy.lum-superproxy.io:22225');
+            }
 
-            const item = await this.extractItemDetail(url, this.collectSite)
-            return item;
+            const browser = await puppeteer.launch(global);
+            let context = await browser.createIncognitoBrowserContext();
+            const page = await context.newPage();
+            await this.pageSet(page);
 
+
+            try {
+                try {
+                    await page.goto(url, {waitUntil: "networkidle2"}, {timeout: 30000});
+                    await sleep(5);
+                    await page.waitForSelector('h1.product-card-top__title', {timeout: 10000});
+                    await page.waitForSelector('div.product-card-top__code', {timeout: 10000});
+                    await page.waitForSelector('button.button-ui.button-ui_white.product-characteristics__expand', {timeout: 10000});
+                    await page.waitForSelector('div.product-card-top.product-card-top_full > div.product-card-top__buy > div.product-buy.product-buy_one-line > div >div.product-buy__price', {timeout: 10000});
+                    await page.click('button.button-ui.button-ui_white.product-characteristics__expand');
+                    await page.waitForSelector('div.product-card-top__buy > div.product-buy > button.button-ui.buy-btn', {timeout: 20000});
+                } catch (e) {
+                    logger.error(e.message);
+                    // await page.waitForSelector('span.product-card-top__avails.avails-container.avails-container_tile', {timeout: 10000});
+                    // await page.waitForSelector('div.order-avail-wrap.order-avail-wrap_not-avail', {timeout: 10000});
+                    await sleep(2);
+                }
+                await sleep(5);
+
+
+                let cItem = new ColtItem();
+                const detailPage = cheerio.load(await page.content());
+
+                const title = detailPage('h1.product-card-top__title').text();
+                const item_num = await this.getItemNum(url);
+                if (!await isNotUndefinedOrEmpty(title)) {
+                    await this.makeNotFoundColtItem(cItem, url, collectSite, item_num, detailPage);
+                    return cItem;
+                }
+                logger.info('ITEM_NUM: ' + item_num + ' TITLE:' + title);
+
+                let category = await this.getCateInfo(detailPage);
+                if (await isNotUndefinedOrEmpty(category)) {
+                    category = '(#M)' + category;
+                } else {
+                    category = 'NO_CATEGORY';
+                }
+
+                const product_code = detailPage('div.product-card-top__code').text().replaceAll(/\D+/gm, '');
+                let brand_name = detailPage('a.product-card-top__brand > img').attr('alt');
+                let avgPoint = detailPage('div.product-card-top__stat > a.product-card-top__rating').attr('data-rating');
+                if (avgPoint == '0') avgPoint = '0.0';
+                if (!await isNotUndefinedOrEmpty(avgPoint)) avgPoint = '0.0';
+                let totalEvalutCnt = await this.getTotalEvalutCnt(detailPage);
+                let addInfo = await this.getAddInfo(detailPage, product_code);
+
+
+                //--price--
+                let priceDiv = detailPage('div.product-card-top.product-card-top_full > div.product-card-top__buy > div.product-buy.product-buy_one-line > div >div.product-buy__price').text().replaceAll(/\s/gm, '');
+                let priceInfo = priceDiv.split('₽')
+                let orgPrice = Math.max(priceInfo[0], priceInfo[1]);
+                let disPrice = Math.min(priceInfo[0], priceInfo[1]);
+                if (Object.is(orgPrice, NaN)) orgPrice = 0;
+                if (Object.is(disPrice, NaN)) disPrice = 0;
+                let ivtAddPrice = orgPrice;
+                if (disPrice > 0) {
+                    const coltDis = new ColtItemDiscount()
+                    ivtAddPrice = disPrice;
+                    let discountRate = Math.round((orgPrice - disPrice) / orgPrice * 100)
+                    coltDis.ColtItemDiscount.discountPrice = String(disPrice);
+                    coltDis.ColtItemDiscount.discountRate = String(discountRate);
+                    cItem.coltItemDiscountList.push(coltDis)
+                }
+
+                await this.makeColtItem(cItem, url, collectSite, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice);
+                //--option--
+                let optionList = await this.getOptionInfo(detailPage);
+
+                //--image and video--
+                let imageList = [];
+                try {
+                    imageList = await this.getImageAndVideoInfo(detailPage, context);
+                } catch (error) {
+                    console.log('getImageAndVideoInfo Fail')
+                }
+                imageList.map((image) => {
+                    const coltImage = new ColtImage();
+                    coltImage.ColtImage.goodsImage = image;
+                    coltImage.ColtImage.hash = hash.toHash(image);
+                    cItem.coltImageList.push(coltImage);
+                });
+
+
+                await this.getStockInfo(cItem, page, detailPage, url, optionList, product_code, ivtAddPrice);
+                return cItem;
+            } catch (error) {
+                logger.error(error.stack)
+            } finally {
+                if (this.OXYLABS) global.args.pop()
+                page.close();
+                browser.close();
+            }
         } catch (e) {
             logger.error(e.stack)
-        }
-    }
-
-    async extractItemDetail(url, collectSite) {
-        if (this.OXYLABS) {
-            let ipList = await this.getIpList();
-            let mod = (this.cnt % ipList.length)
-            let ip = ipList[mod];
-            global.args.push('--proxy-server=' + ip);
-        }
-        if (this.LUMINATI) {
-            global.args.push('--proxy-server=zproxy.lum-superproxy.io:22225');
-        }
-
-        const browser = await puppeteer.launch(global);
-        let context = await browser.createIncognitoBrowserContext();
-        const page = await context.newPage();
-        await this.pageSet(page);
-
-
-        try {
-            try {
-                await page.goto(url, {waitUntil: "networkidle2"}, {timeout: 30000});
-                await sleep(5);
-                await page.waitForSelector('h1.product-card-top__title', {timeout: 10000});
-                await page.waitForSelector('div.product-card-top__code', {timeout: 10000});
-                await page.waitForSelector('button.button-ui.button-ui_white.product-characteristics__expand', {timeout: 10000});
-                await page.waitForSelector('div.product-card-top.product-card-top_full > div.product-card-top__buy > div.product-buy.product-buy_one-line > div >div.product-buy__price', {timeout: 10000});
-                await page.click('button.button-ui.button-ui_white.product-characteristics__expand');
-                await page.waitForSelector('div.product-card-top__buy > div.product-buy > button.button-ui.buy-btn', {timeout: 20000});
-            } catch (e) {
-                logger.error(e.message);
-                // await page.waitForSelector('span.product-card-top__avails.avails-container.avails-container_tile', {timeout: 10000});  
-                // await page.waitForSelector('div.order-avail-wrap.order-avail-wrap_not-avail', {timeout: 10000});
-                await sleep(2);
-            }
-            await sleep(5);
-
-
-            let cItem = new ColtItem();
-            const detailPage = cheerio.load(await page.content());
-
-            const title = detailPage('h1.product-card-top__title').text();
-            const item_num = await this.getItemNum(url);
-            if (!await isNotUndefinedOrEmpty(title)) {
-                await this.makeNotFoundColtItem(cItem, url, collectSite, item_num, detailPage);
-                return cItem;
-            }
-            logger.info('ITEM_NUM: ' + item_num + ' TITLE:' + title);
-
-            let category = await this.getCateInfo(detailPage);
-            if (await isNotUndefinedOrEmpty(category)) {
-                category = '(#M)' + category;
-            } else {
-                category = 'NO_CATEGORY';
-            }
-
-            const product_code = detailPage('div.product-card-top__code').text().replaceAll(/\D+/gm, '');
-            let brand_name = detailPage('a.product-card-top__brand > img').attr('alt');
-            let avgPoint = detailPage('div.product-card-top__stat > a.product-card-top__rating').attr('data-rating');
-            if (avgPoint == '0') avgPoint = '0.0';
-            if (!await isNotUndefinedOrEmpty(avgPoint)) avgPoint = '0.0';
-            let totalEvalutCnt = await this.getTotalEvalutCnt(detailPage);
-            let addInfo = await this.getAddInfo(detailPage, product_code);
-
-
-            //--price--
-            let priceDiv = detailPage('div.product-card-top.product-card-top_full > div.product-card-top__buy > div.product-buy.product-buy_one-line > div >div.product-buy__price').text().replaceAll(/\s/gm, '');
-            let priceInfo = priceDiv.split('₽')
-            let orgPrice = Math.max(priceInfo[0], priceInfo[1]);
-            let disPrice = Math.min(priceInfo[0], priceInfo[1]);
-            if (Object.is(orgPrice, NaN)) orgPrice = 0;
-            if (Object.is(disPrice, NaN)) disPrice = 0;
-            let ivtAddPrice = orgPrice;
-            if (disPrice > 0) {
-                const coltDis = new ColtDiscount()
-                ivtAddPrice = disPrice;
-                let discountRate = Math.round((orgPrice - disPrice) / orgPrice * 100)
-                coltDis.ColtItemDiscount.discountPrice = disPrice;
-                coltDis.ColtItemDiscount.discountRate = discountRate;
-                cItem.coltItemDiscountList.push(coltDis)
-            }
-
-            await this.makeColtItem(cItem, url, collectSite, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice);
-            //--option--
-            let optionList = await this.getOptionInfo(detailPage);
-
-            //--image and video--
-            let imageList = [];
-            try {
-                imageList = await this.getImageAndVideoInfo(detailPage, context);
-            } catch (error) {
-                console.log('getImageAndVideoInfo Fail')
-            }
-            imageList.map((image) => {
-                const coltImage = new ColtImage();
-                coltImage.ColtImage.goodsImage = image;
-                coltImage.ColtImage.hash = hash.toHash(image);
-                cItem.coltImageList.push(coltImage);
-            });
-
-
-            await this.getStockInfo(cItem, page, detailPage, url, optionList, product_code, ivtAddPrice);
-            return cItem;
-        } catch (error) {
-            logger.error(error.stack)
-        } finally {
-            if (this.OXYLABS) global.args.pop()
-            page.close();
-            browser.close();
         }
     }
 
@@ -245,7 +238,7 @@ class DnsDetail {
             }
         }
 
-        const ivt = new ColtIvt();
+        const ivt = new ColtItemIvt();
         ivt.ColtItemIvt.stockId = product_code;
         ivt.ColtItemIvt.addPrice = ivtAddPrice;
         ivt.ColtItemIvt.colorOption = option1;
@@ -330,7 +323,7 @@ class DnsDetail {
 
     }
 
-    async makeColtItem(cItem, url, collectSite, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice) {
+    async makeColtItem(cItem: ColtItem, url, collectSite, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice) {
         cItem.collectSite = collectSite;
         cItem.collectUrl = url;
         cItem.siteName = 'DNS';
@@ -361,10 +354,10 @@ class DnsDetail {
             cItem.goodsName = 'Page Not Found';
             cItem.goodsCate = category;
             cItem.brandName = '';
-            cItem.price = 0;
-            cItem.sitePrice = 0;
+            cItem.price = '0';
+            cItem.sitePrice = '0';
             cItem.totalEvalCnt = 0;
-            cItem.fivePoint = '0.0';
+            cItem.fivePoint = 0.0;
             cItem.addInfo = '';
 
             const coltImage = new ColtImage();
@@ -372,7 +365,7 @@ class DnsDetail {
             coltImage.ColtImage.hash = hash.toHash(image);
             cItem.coltImageList.push(coltImage);
 
-            const ivt = new ColtIvt();
+            const ivt = new ColtItemIvt();
             ivt.ColtItemIvt.stockId = item_num;
             ivt.ColtItemIvt.addPrice = 0;
             ivt.ColtItemIvt.option = 'Not Found';
@@ -588,5 +581,4 @@ async function sleep(sec) {
 }
 
 
-module.exports = DnsDetail;
 export {DnsDetail}

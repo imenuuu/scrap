@@ -6,11 +6,11 @@
     "detail" : [
         {
             "COLLECT_SITE" : "lg.dns-shop.ru",
-            "CLASS_PATH" : "../site/detail/dns/DnsDetail"
+            "CLASS_PATH" : "DnsDetail"
         },
         {
             "COLLECT_SITE" : "top.naverstore.com",
-            "CLASS_PATH" : "../site/detail/naver/NaverDetail"
+            "CLASS_PATH" : "NaverDetail"
         },
         {
             "COLLECT_SITE" : "top.gsshop.com",

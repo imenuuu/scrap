@@ -7,8 +7,8 @@ class ColtItemIvt {
         styleOption: '',
         giftOption: '',
         option: '',
-        stockAmount: '',
-        addPrice: '',
+        stockAmount: 0,
+        addPrice: 0,
         collectDay: '',
         regDt: ''
     }
