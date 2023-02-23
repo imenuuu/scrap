@@ -18,7 +18,7 @@
         },
         {
             "COLLECT_SITE" : "lg.datart.cz",
-            "CLASS_PATH" : "../site/detail/datart/DatartDetail"
+            "CLASS_PATH" : "DatartDetail"
         }
         
     ],
