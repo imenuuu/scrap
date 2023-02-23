@@ -115,8 +115,8 @@ class DatartDetail implements Detail {
                         price = Number(price)
                         let discountRate = Math.round((price - sitePrice) / price * 100)
                         const coltDis = new ColtItemDiscount()
-                        coltDis.ColtItemDiscount.discountPrice = String(sitePrice);
-                        coltDis.ColtItemDiscount.discountRate = String(discountRate);
+                        coltDis.discountPrice = String(sitePrice);
+                        coltDis.discountRate = String(discountRate);
                         cItem.coltItemDiscountList.push(coltDis)
                     } else {
                         price = sitePrice

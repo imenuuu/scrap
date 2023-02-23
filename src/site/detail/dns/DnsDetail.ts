@@ -110,8 +110,8 @@ class DnsDetail implements Detail {
                     const coltDis = new ColtItemDiscount()
                     ivtAddPrice = disPrice;
                     let discountRate = Math.round((orgPrice - disPrice) / orgPrice * 100)
-                    coltDis.ColtItemDiscount.discountPrice = String(disPrice);
-                    coltDis.ColtItemDiscount.discountRate = String(discountRate);
+                    coltDis.discountPrice = String(disPrice);
+                    coltDis.discountRate = String(discountRate);
                     cItem.coltItemDiscountList.push(coltDis)
                 }
 
