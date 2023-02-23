@@ -1,4 +1,5 @@
 import {DetailTask} from "./src/task/DetailTask";
+import {ColtItem} from "./src/dto/ColtItem";
 
 const logger = require('./src/config/logger/Logger');
 const express = require('express');
@@ -9,7 +10,6 @@ const bodyParser = require('body-parser');
 const chromeConfig = require('./src/config/chrome/ChromeConfig').options;
 const service = require('./src/config/service.json');
 const validator = require('./src/util/ValidatorUtil');
-const ColtItem = require("./src/dto/ColtItem");
 
 let taskType = 'list'
 const API_PATH = '/acq/node/detail';
