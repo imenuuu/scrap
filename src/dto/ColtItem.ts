@@ -8,6 +8,7 @@ class ColtItem {
 
     constructor() {
     }
+
     orgGoodsNum: string = '';
     itemNum: string = '';
     goodsName: string = '';
@@ -58,4 +59,4 @@ class ColtItem {
     };
 }
 
-export {ColtItem}
+export {ColtItem};

@@ -1,17 +1,15 @@
 class ColtItemIvt {
-    ColtItemIvt = {
-        itemId: 0,
-        stockId: '',
-        colorOption: '',
-        sizeOption: '',
-        styleOption: '',
-        giftOption: '',
-        option: '',
-        stockAmount: 0,
-        addPrice: 0,
-        collectDay: '',
-        regDt: ''
-    }
+    itemId: number = 0;
+    collectDay: string = '';
+    colorOption: string = '';
+    sizeOption: string = '';
+    giftOption: string = '';
+    option: string = '';
+    styleOption: string = '';
+    addPrice: number = 0;
+    stockAmount: number = 0;
+    stockId: string = '';
+    regDt: string = '';
 }
 
-export {ColtItemIvt}
+export {ColtItemIvt};

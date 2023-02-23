@@ -185,16 +185,16 @@ class DatartDetail implements Detail {
 
     async getOptionStock(page, cItem: ColtItem, itemNum, sitePrice) {
         const ivt = new ColtItemIvt();
-        ivt.ColtItemIvt.stockId = itemNum;
-        ivt.ColtItemIvt.addPrice = sitePrice;
-        ivt.ColtItemIvt.stockAmount = -999;
+        ivt.stockId = itemNum;
+        ivt.addPrice = sitePrice;
+        ivt.stockAmount = -999;
         try {
             let detailPage = cheerio.load(await page.content());
             let stockStatus = detailPage("span.product-availability-state").text().trim()
             if (sitePrice == 0 || stockStatus == "Není skladem") {
-                ivt.ColtItemIvt.option = "Out of stock";
+                ivt.option = "Out of stock";
             } else {
-                ivt.ColtItemIvt.option = "In stock";
+                ivt.option = "In stock";
             }
             cItem.coltItemIvtList.push(ivt);
         } catch (error) {

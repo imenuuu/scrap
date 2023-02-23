@@ -240,14 +240,14 @@ class DnsDetail implements Detail {
         }
 
         const ivt = new ColtItemIvt();
-        ivt.ColtItemIvt.stockId = product_code;
-        ivt.ColtItemIvt.addPrice = ivtAddPrice;
-        ivt.ColtItemIvt.colorOption = option1;
-        ivt.ColtItemIvt.sizeOption = option2;
-        ivt.ColtItemIvt.styleOption = option3;
-        ivt.ColtItemIvt.giftOption = option4;
-        ivt.ColtItemIvt.option = stockOption;
-        ivt.ColtItemIvt.stockAmount = stockAmout;
+        ivt.stockId = product_code;
+        ivt.addPrice = ivtAddPrice;
+        ivt.colorOption = option1;
+        ivt.sizeOption = option2;
+        ivt.styleOption = option3;
+        ivt.giftOption = option4;
+        ivt.option = stockOption;
+        ivt.stockAmount = stockAmout;
         cItem.coltItemIvtList.push(ivt);
     }
 
@@ -367,10 +367,10 @@ class DnsDetail implements Detail {
             cItem.coltImageList.push(coltImage);
 
             const ivt = new ColtItemIvt();
-            ivt.ColtItemIvt.stockId = item_num;
-            ivt.ColtItemIvt.addPrice = 0;
-            ivt.ColtItemIvt.option = 'Not Found';
-            ivt.ColtItemIvt.stockAmount = -999;
+            ivt.stockId = item_num;
+            ivt.addPrice = 0;
+            ivt.option = 'Not Found';
+            ivt.stockAmount = -999;
             cItem.coltItemIvtList.push(ivt);
 
             logger.info('Not Found Page! , ITEM_NUM: ' + item_num);
