@@ -1,15 +1,14 @@
+import {ColtItemEvalutInfo} from "./ColtEvalutInfo";
 
 class ColtItemEvalut {
-    ColtItemEvalut = {
-        itemId: '',
-        COLLECcollectDayT_DAY: '',
-        avgPoint: '',
-        goodsComment: '',
-        hash: 0,
-        regDt: ''
-    }
+    itemId: number = 0;
+    collectDay: string = '';
+    avgPoint: string = '';
+    goodsComment: string = '';
+    hash: number = 0;
+    regDt: string = '';
 
-    ColtItemEvalutInfo = {};
+    coltItemEvalutInfo: ColtItemEvalutInfo = new ColtItemEvalutInfo();
 }
 
-export {ColtItemEvalut}
+export {ColtItemEvalut};
