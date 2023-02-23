@@ -118,8 +118,8 @@ class DatartDetail {
                     price = oldPriceDiv.text().trim().replace(/[^0-9]/g, "")
                     price = Number(price)
                     let discountRate = Math.round((price - sitePrice) / price * 100)
-                    cItem.coltItemDiscount.discountPrice = sitePrice;
-                    cItem.coltItemDiscount.discountRate = discountRate;
+                    cItem.coltItemDiscountList.discountPrice = sitePrice;
+                    cItem.coltItemDiscountList.discountRate = discountRate;
                 } else {
                     price = sitePrice
                 }
@@ -182,7 +182,7 @@ class DatartDetail {
         return ipList;
     }
 
-    async getOptionStock(page, cItem, itemNum, sitePrice) {
+    async getOptionStock(page, cItem: ColtItem, itemNum, sitePrice) {
         const ivt = new ColtIvt();
         ivt.ColtItemIvt.stockId = itemNum;
         ivt.ColtItemIvt.addPrice = sitePrice;
@@ -258,7 +258,7 @@ class DatartDetail {
         }
     }
 
-    async getImage(page, cItem, videoList) {    
+    async getImage(page, cItem: ColtItem, videoList) {
         try {
             let detailPage = cheerio.load(await page.content());
             detailPage("div.product-gallery-slider > div.owl-stage-outer > div.owl-stage > div.owl-item").each((index, list) => {

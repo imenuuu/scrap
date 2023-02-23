@@ -1,23 +1,25 @@
+import type {Detail} from "../Detail";
+import {ColtItem} from "../../../dto/ColtItem";
+
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
-const ColtItem = require('../../../dto/ColtItem');
 const logger = require('../../../config/logger/Logger');
 const service = require('../../../config/service.json');
 
 const http = require('http');
 
-class NaverDetail {
-    private _glbConfig: any;
-    private collectSite: any;
-    private luminati_zone: any;
-    private OXYLABS: any;
-    private LUMINATI: any;
-    private cnt: any;
+export class NaverDetail implements Detail {
+    _glbConfig: { [key: string]: any; };
+    collectSite: string;
+    luminati_zone: string;
+    OXYLABS: boolean;
+    LUMINATI: boolean;
+    cnt: number;
 
     constructor(config, collectSite, cnt) {
         this._glbConfig = config;
         this._glbConfig.userDataDir = service.DETAIL_PUPPET_PROFILE;
-        global = this._glbConfig;
+        // global = this._glbConfig;
         this.collectSite = collectSite;
         this.luminati_zone = 'lum-customer-epopcon-zone-zone1';
         this.OXYLABS = service.OXYLABS;
@@ -25,61 +27,62 @@ class NaverDetail {
         this.cnt = cnt;
     }
 
-    async extractFromItemList(url) {
+    // async extractFromItemList(url) {
+    //
+    //     const item = await this.extractItemDetail(url)
+    //
+    //     return item;
+    //
+    //
+    // }
+
+    async extractItemDetail(url): Promise<ColtItem> {
         try {
 
-            const item = await this.extractItemDetail(url)
+            if (this.OXYLABS) {
+                let ipList = await this.getIpList();
+                let mod = (this.cnt % ipList.length)
+                let ip = ipList[mod];
+                this._glbConfig.args.push('--proxy-server=' + ip);
+            }
 
-            return item;
+            if (this.LUMINATI) {
+                this._glbConfig.args.push('--proxy-server=zproxy.lum-superproxy.io:22225');
+            }
 
+            const browser = await puppeteer.launch(this._glbConfig);
+            const page = await browser.newPage();
+            await this.pageSet(page);
+
+
+            try {
+                await page.goto(url, {waitUntil: "networkidle2"}, {timeout: 30000});
+
+            } catch (error) {
+                return null;
+            }
+
+            const detailPage = cheerio.load(await page.content());
+
+            let cItem = new ColtItem();
+
+            let title = detailPage('title').text();
+            logger.info('title: ' + title)
+            cItem.collectSite = this.collectSite;
+            cItem.collectUrl = url;
+            cItem.siteName = 'Naverstore';
+            cItem.goodsName = title
+
+            if (this.OXYLABS) {
+                this._glbConfig.args.pop()
+            }
+            page.close();
+            browser.close();
+            return cItem;
         } catch (e) {
             logger.error(e.stack)
             return null;
         }
-    }
-
-    async extractItemDetail(url) {
-        if (this.OXYLABS) {
-            let ipList = await this.getIpList();
-            let mod = (this.cnt % ipList.length)
-            let ip = ipList[mod];
-            global.args.push('--proxy-server=' + ip);
-        }
-
-        if (this.LUMINATI) {
-            global.args.push('--proxy-server=zproxy.lum-superproxy.io:22225');
-        }
-
-        const browser = await puppeteer.launch(global);
-        const page = await browser.newPage();
-        await this.pageSet(page);
-
-
-        try {
-            await page.goto(url, {waitUntil: "networkidle2"}, {timeout: 30000});
-
-        } catch (error) {
-            return null;
-        }
-
-        const detailPage = cheerio.load(await page.content());
-
-        let cItem = new ColtItem();
-
-        let title = detailPage('title').text();
-        logger.info('title: ' + title)
-        cItem.collectSite = this.collectSite;
-        cItem.collectUrl = url;
-        cItem.siteName = 'Naverstore';
-        cItem.goodsName = title
-
-        if (this.OXYLABS) {
-            global.args.pop()
-        }
-        page.close();
-        browser.close();
-        return cItem;
-
     }
 
 
@@ -116,7 +119,7 @@ class NaverDetail {
     }
 
     async getIpList() {
-        let browserOxylab = await puppeteer.launch(global);
+        let browserOxylab = await puppeteer.launch(this._glbConfig);
         let pageOxylab = await browserOxylab.newPage();
         await pageOxylab.authenticate({
             username: 'epopcon',
@@ -140,6 +143,5 @@ class NaverDetail {
 
 }
 
-module.exports = NaverDetail;
-export {NaverDetail}
+
 

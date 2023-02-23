@@ -121,7 +121,7 @@ class DnsDetail {
                 let discountRate = Math.round((orgPrice - disPrice) / orgPrice * 100)
                 coltDis.ColtItemDiscount.discountPrice = disPrice;
                 coltDis.ColtItemDiscount.discountRate = discountRate;
-                cItem.coltItemDiscount.push(coltDis)
+                cItem.coltItemDiscountList.push(coltDis)
             }
 
             await this.makeColtItem(cItem, url, collectSite, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice);
@@ -347,7 +347,7 @@ class DnsDetail {
         cItem.addInfo = addInfo;
     }
 
-    async makeNotFoundColtItem(cItem, url, collectSite, item_num, detailPage) {
+    async makeNotFoundColtItem(cItem: ColtItem, url, collectSite, item_num, detailPage) {
         let title = detailPage('div.site-error-404 > div.site-error-404__message > h1 ').text();
         if (title.includes('Извините, данный товар временно отсутствует в продаже')) {
             let category = 'NO_CATEGORY';

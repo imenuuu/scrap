@@ -1,7 +1,7 @@
 {
-    "OXYLABS" : false,
+    "OXYLABS" : true,
     "OXYLABS_URL" : "https://api.oxylabs.io/v1/proxies/lists/4b33bfee-80a6-11eb-927e-901b0ec4424b",
-    "LUMINATI" : true,
+    "LUMINATI" : false,
     "DETAIL_PUPPET_PROFILE" : "../../puppet_profile/detail",
     "detail" : [
         {

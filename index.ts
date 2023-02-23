@@ -120,7 +120,7 @@ function sendErrorResponse(res, e: Error) {
                 item = await task.execute(url, cnt++);
                 cnt = cnt > 300 ? 0 : cnt;
             } catch (e) {
-                logger.error("detailTask error", e);
+                logger.error(e.stack);
                 sendErrorResponse(res, e);
                 delete urls[key];
                 return
@@ -135,7 +135,7 @@ function sendErrorResponse(res, e: Error) {
             delete urls[key];
             return
         } catch (e) {
-            logger.error('post error', e);
+            logger.error(e.stack);
             sendErrorResponse(res, e);
             if (key !== '') {
                 delete urls[key]

@@ -1,3 +1,7 @@
+import type {Detail} from "../site/detail/Detail";
+import {NaverDetail} from "../site/detail/naver/NaverDetail";
+import type {ColtItem} from "../dto/ColtItem";
+
 export class DetailTask {
     private _collectSite: any;
     private _dirName: any;
@@ -9,11 +13,19 @@ export class DetailTask {
         this._config = chromeConfig;
     }
 
-    async execute(url, cnt) {
+    private detailType = {
+        NaverDetail: NaverDetail,
+    };
 
-        const detailClass = require(`${this._dirName}`)
-        const detail = new detailClass(this._config, this._collectSite, cnt);
-        const item = await detail.extractFromItemList(url);
+    detailClass(className: string)
+        : new (config: string, collectSite: string, cnt: number) => Detail {
+        return this.detailType[className];
+    }
+
+    async execute(url, cnt): Promise<ColtItem> {
+
+        const detail = new (this.detailClass('NaverDetail'))(this._config, this._collectSite, cnt);
+        const item = await detail.extractItemDetail(url);
         return item;
     }
 }
