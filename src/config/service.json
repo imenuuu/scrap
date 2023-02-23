@@ -21,8 +21,13 @@
             "CLASS_PATH" : "../site/detail/datart/DatartDetail"
         }
         
-    ]
+    ],
 
-    
-        
+    "LIST_PUPPET_PROFILE" : "../../puppet_profile/detail",
+    "list" : [
+        {
+            "COLLECT_SITE" : "lg.dns-shop.ru",
+            "CLASS_PATH" : "../site/list/dns/DnsKeywordList"
+        }
+    ]
 }
