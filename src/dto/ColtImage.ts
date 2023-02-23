@@ -1,11 +1,9 @@
 class ColtImage {
-    ColtImage = {
-        itemId: 0,
-        goodsImage: '',
-        status: 1,
-        hash: '',
-        regDt: ''
-    }
+    itemId: number = 0;
+    goodsImage: string = '';
+    status: number = 1;
+    hash: number = 0;
+    regDt: string = '';
 }
 
-export {ColtImage}
+export {ColtImage};

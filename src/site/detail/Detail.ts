@@ -9,5 +9,5 @@ export interface Detail {
     cnt: number;
 
     // extractFromItemList(url) :Promise<ColtItem>
-    extractItemDetail:(url: string) => Promise<ColtItem>
+    extractItemDetail: (url: string) => Promise<ColtItem>;
 }

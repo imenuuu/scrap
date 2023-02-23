@@ -38,7 +38,7 @@ class DnsDetail implements Detail {
         try {
             if (this.OXYLABS) {
                 let ipList = await this.getIpList();
-                let mod = (this.cnt % ipList.length)
+                let mod = (this.cnt % ipList.length);
                 let ip = ipList[mod];
                 global.args.push('--proxy-server=' + ip);
             }
@@ -100,19 +100,19 @@ class DnsDetail implements Detail {
 
                 //--price--
                 let priceDiv = detailPage('div.product-card-top.product-card-top_full > div.product-card-top__buy > div.product-buy.product-buy_one-line > div >div.product-buy__price').text().replaceAll(/\s/gm, '');
-                let priceInfo = priceDiv.split('₽')
+                let priceInfo = priceDiv.split('₽');
                 let orgPrice = Math.max(priceInfo[0], priceInfo[1]);
                 let disPrice = Math.min(priceInfo[0], priceInfo[1]);
                 if (Object.is(orgPrice, NaN)) orgPrice = 0;
                 if (Object.is(disPrice, NaN)) disPrice = 0;
                 let ivtAddPrice = orgPrice;
                 if (disPrice > 0) {
-                    const coltDis = new ColtItemDiscount()
+                    const coltDis = new ColtItemDiscount();
                     ivtAddPrice = disPrice;
-                    let discountRate = Math.round((orgPrice - disPrice) / orgPrice * 100)
+                    let discountRate = Math.round((orgPrice - disPrice) / orgPrice * 100);
                     coltDis.discountPrice = String(disPrice);
                     coltDis.discountRate = String(discountRate);
-                    cItem.coltItemDiscountList.push(coltDis)
+                    cItem.coltItemDiscountList.push(coltDis);
                 }
 
                 await this.makeColtItem(cItem, url, this.collectSite, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice);
@@ -124,12 +124,12 @@ class DnsDetail implements Detail {
                 try {
                     imageList = await this.getImageAndVideoInfo(detailPage, context);
                 } catch (error) {
-                    console.log('getImageAndVideoInfo Fail')
+                    console.log('getImageAndVideoInfo Fail');
                 }
                 imageList.map((image) => {
                     const coltImage = new ColtImage();
-                    coltImage.ColtImage.goodsImage = image;
-                    coltImage.ColtImage.hash = hash.toHash(image);
+                    coltImage.goodsImage = image;
+                    coltImage.hash = hash.toHash(image);
                     cItem.coltImageList.push(coltImage);
                 });
 
@@ -137,14 +137,14 @@ class DnsDetail implements Detail {
                 await this.getStockInfo(cItem, page, detailPage, url, optionList, product_code, ivtAddPrice);
                 return cItem;
             } catch (error) {
-                logger.error(error.stack)
+                logger.error(error.stack);
             } finally {
-                if (this.OXYLABS) global.args.pop()
+                if (this.OXYLABS) global.args.pop();
                 page.close();
                 browser.close();
             }
         } catch (e) {
-            logger.error(e.stack)
+            logger.error(e.stack);
         }
     }
 
@@ -155,17 +155,17 @@ class DnsDetail implements Detail {
             username: 'epopcon',
             password: 'FChB5uEd45',
             key: '4b33bfee-80a6-11eb-927e-901b0ec4424b'
-        })
-        let response = await pageOxylab.goto(service.OXYLABS_URL)
-        let jsonArr = JSON.parse(await response.text())
+        });
+        let response = await pageOxylab.goto(service.OXYLABS_URL);
+        let jsonArr = JSON.parse(await response.text());
 
         pageOxylab.close();
         browserOxylab.close();
 
         let ipList = [];
         for (let json of jsonArr) {
-            let ip = json.ip
-            let port = json.port
+            let ip = json.ip;
+            let port = json.port;
             ipList.push(ip + ':' + port);
         }
         return ipList;
@@ -180,19 +180,19 @@ class DnsDetail implements Detail {
             for (let i = 0; i < optionList.length; i++) {
                 switch (i) {
                     case 0:
-                        option1 = optionList[i]
+                        option1 = optionList[i];
                         cItem.colorOption = option1;
                         break;
                     case 1:
-                        option2 = optionList[i]
+                        option2 = optionList[i];
                         cItem.sizeOption = option2;
                         break;
                     case 2:
-                        option3 = optionList[i]
+                        option3 = optionList[i];
                         cItem.styleOption = option3;
                         break;
                     case 3:
-                        option4 = optionList[i]
+                        option4 = optionList[i];
                         cItem.giftOption = option4;
                         break;
                 }
@@ -211,22 +211,22 @@ class DnsDetail implements Detail {
 
         if (avail.includes('Товара нет в наличии')) {
             stockOption = 'Out of stock';
-            logger.info('The product is out of stock , ' + avail)
+            logger.info('The product is out of stock , ' + avail);
         } else if (avail.includes('Скоро будет доступен')) {
             stockOption = '';
-            logger.info('Coming Soon , ' + avail + ",  product_code: " + product_code)
+            logger.info('Coming Soon , ' + avail + ",  product_code: " + product_code);
         } else if (avail.includes('Продажи прекращены')) {
             stockOption = 'Out of stock';
-            logger.info('Sales discontinued , ' + avail)
+            logger.info('Sales discontinued , ' + avail);
         } else if (avail1.includes('Товара нет в наличии')) {
             stockOption = 'Out of stock';
-            logger.info('The product is out of stock , ' + avail1.replaceAll(/\n/gm, ''))
+            logger.info('The product is out of stock , ' + avail1.replaceAll(/\n/gm, ''));
         } else if (avail2.includes('Уведомить')) {
             stockOption = 'Out of stock';
-            logger.info('The product is notify , ' + avail2.replaceAll(/\n/gm, ''))
+            logger.info('The product is notify , ' + avail2.replaceAll(/\n/gm, ''));
         } else if (voidChk.length == 0) {
             stockOption = '';
-            logger.info('The product is Void , product_code: ' + product_code)
+            logger.info('The product is Void , product_code: ' + product_code);
         } else {
             stockOption = 'In stock';
             stockYn = true;
@@ -261,9 +261,9 @@ class DnsDetail implements Detail {
                 try {
                     await page.click('div.product-card-top__buy > div.product-buy > button.button-ui.buy-btn');
                 } catch (error) {
-                    logger.error('장바구니추가 클릭 error ' + error.stack)
+                    logger.error('장바구니추가 클릭 error ' + error.stack);
                     await page.evaluate(() => {
-                        ([...document.querySelectorAll('.product-card-top__buy > div.product-buy > button.button-ui.buy-btn')].find(element => element.textContent === 'Купить') as HTMLElement).click()
+                        ([...document.querySelectorAll('.product-card-top__buy > div.product-buy > button.button-ui.buy-btn')].find(element => element.textContent === 'Купить') as HTMLElement).click();
                     });
                 }
                 await sleep(8);
@@ -294,7 +294,7 @@ class DnsDetail implements Detail {
                 await page.waitForSelector('div.cart-items__product-code', {timeout: 30000});
             } catch (error) {
                 await sleep(1);
-                logger.error('Goto CartPage Error')
+                logger.error('Goto CartPage Error');
             }
             await sleep(3);
             const cartContent = cheerio.load(await page.content());
@@ -362,8 +362,8 @@ class DnsDetail implements Detail {
             cItem.addInfo = '';
 
             const coltImage = new ColtImage();
-            coltImage.ColtImage.goodsImage = image;
-            coltImage.ColtImage.hash = hash.toHash(image);
+            coltImage.goodsImage = image;
+            coltImage.hash = hash.toHash(image);
             cItem.coltImageList.push(coltImage);
 
             const ivt = new ColtItemIvt();
@@ -420,11 +420,11 @@ class DnsDetail implements Detail {
 
                 let response = await videoPage.goto(reqUrl, {timeout: 30000});
                 await sleep(1);
-                let jsonArr = JSON.parse(await response.text())
+                let jsonArr = JSON.parse(await response.text());
                 let tabs = jsonArr.data.tabs;
 
                 for (let json of tabs) {
-                    let type = json.type
+                    let type = json.type;
                     if (type == 'video') {
                         videoJson = json.objects;
                     }
@@ -448,7 +448,7 @@ class DnsDetail implements Detail {
     }
 
     async getOptionInfo(detailPage) {
-        let optionList = []
+        let optionList = [];
         detailPage('div.multicard.product-card-top__multi >div.multicard__param').each((index, el) => {
             let optionDiv = detailPage(el);
             let title = optionDiv.find('> div.multicard__param-title').text().replaceAll(/\s+/gm, '');
@@ -505,10 +505,10 @@ class DnsDetail implements Detail {
     }
 
     async getCateInfo(detailPage) {
-        let cateList = []
+        let cateList = [];
         let catelength = detailPage('ol.breadcrumb-list > li ').length - 1;
         detailPage('ol.breadcrumb-list > li ').each((index, el) => {
-            let cateName = ''
+            let cateName = '';
             if (index == catelength - 1) {
                 return;
             } else if (index == catelength) {
@@ -535,7 +535,7 @@ class DnsDetail implements Detail {
         await page.evaluateOnNewDocument(() => {
             Object.defineProperty(navigator, 'webdriver', {
                 get: () => false
-            })
+            });
         });
 
         if (this.OXYLABS) {
@@ -543,7 +543,7 @@ class DnsDetail implements Detail {
                 username: 'epopcon',
                 password: 'FChB5uEd45',
                 key: '4b33bfee-80a6-11eb-927e-901b0ec4424b'
-            })
+            });
 
         }
 
@@ -551,7 +551,7 @@ class DnsDetail implements Detail {
             await page.authenticate({
                 username: this.luminati_zone,
                 password: 'jhwfsy8ucuh2'
-            })
+            });
         }
 
         await page.setDefaultTimeout(50000000);
@@ -567,19 +567,19 @@ async function isNotUndefinedOrEmpty(value) {
     if (value == "" ||
         value == null ||
         value == undefined) {
-        return false
+        return false;
     } else {
-        return true
+        return true;
     }
 }
 
 
 async function sleep(sec) {
-    sec = sec * 1000
+    sec = sec * 1000;
     return new Promise((resolve) => {
         setTimeout(resolve, sec);
-    })
+    });
 }
 
 
-export {DnsDetail}
+export {DnsDetail};

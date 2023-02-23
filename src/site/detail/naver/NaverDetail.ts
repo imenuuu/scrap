@@ -41,7 +41,7 @@ export class NaverDetail implements Detail {
 
             if (this.OXYLABS) {
                 let ipList = await this.getIpList();
-                let mod = (this.cnt % ipList.length)
+                let mod = (this.cnt % ipList.length);
                 let ip = ipList[mod];
                 this._glbConfig.args.push('--proxy-server=' + ip);
             }
@@ -67,20 +67,20 @@ export class NaverDetail implements Detail {
             let cItem = new ColtItem();
 
             let title = detailPage('title').text();
-            logger.info('title: ' + title)
+            logger.info('title: ' + title);
             cItem.collectSite = this.collectSite;
             cItem.collectUrl = url;
             cItem.siteName = 'Naverstore';
-            cItem.goodsName = title
+            cItem.goodsName = title;
 
             if (this.OXYLABS) {
-                this._glbConfig.args.pop()
+                this._glbConfig.args.pop();
             }
             page.close();
             browser.close();
             return cItem;
         } catch (e) {
-            logger.error(e.stack)
+            logger.error(e.stack);
             return null;
         }
     }
@@ -90,7 +90,7 @@ export class NaverDetail implements Detail {
         await page.evaluateOnNewDocument(() => {
             Object.defineProperty(navigator, 'webdriver', {
                 get: () => false
-            })
+            });
         });
 
         await page.setDefaultTimeout(50000000);
@@ -100,14 +100,14 @@ export class NaverDetail implements Detail {
                 username: 'epopcon',
                 password: 'FChB5uEd45',
                 key: '4b33bfee-80a6-11eb-927e-901b0ec4424b'
-            })
+            });
         }
 
         if (this.LUMINATI) {
             await page.authenticate({
                 username: this.luminati_zone,
                 password: 'jhwfsy8ucuh2'
-            })
+            });
 
 
         }
@@ -125,17 +125,17 @@ export class NaverDetail implements Detail {
             username: 'epopcon',
             password: 'FChB5uEd45',
             key: '4b33bfee-80a6-11eb-927e-901b0ec4424b'
-        })
-        let response = await pageOxylab.goto(service.OXYLABS_URL)
-        let jsonArr = JSON.parse(await response.text())
+        });
+        let response = await pageOxylab.goto(service.OXYLABS_URL);
+        let jsonArr = JSON.parse(await response.text());
 
         pageOxylab.close();
         browserOxylab.close();
 
         let ipList = [];
         for (let json of jsonArr) {
-            let ip = json.ip
-            let port = json.port
+            let ip = json.ip;
+            let port = json.port;
             ipList.push(ip + ':' + port);
         }
         return ipList;
