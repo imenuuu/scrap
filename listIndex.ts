@@ -1,4 +1,4 @@
-import {DetailTask} from "./src/task/DetailTask";
+import {ListTask} from "./src/task/ListTask";
 
 const logger = require('./src/config/logger/Logger');
 const express = require('express');
@@ -9,15 +9,13 @@ const bodyParser = require('body-parser');
 const chromeConfig = require('./src/config/chrome/ChromeConfig').options;
 const service = require('./src/config/service.json');
 const validator = require('./src/util/ValidatorUtil');
-const ColtItem = require("./src/dto/ColtItem");
+const ColtBaseUrlItem = require("./src/dto/ColtBaseUrlItem");
 
-const API_PATH = '/acq/node/detail';
+const API_PATH = '/acq/node/list';
 const MAX_CONNECTIONS = 1;
 const MAX_IDLE_CONNECTIONS = 10;
 const urls = {};
 const priorities = {};
-
-let cnt = 0;
 
 function sleep(ms) {
     return new Promise((resolve) => {
@@ -73,8 +71,8 @@ async function waitQueue(key, collectSite, res) {
 
 
 function getClassType(item) {
-    if (item instanceof ColtItem) {
-        return "ColtItem";
+    if (item instanceof Array && item.length > 0) {
+        return "ColtBaseUrlItemList";
     }
 
     return null;
@@ -108,34 +106,37 @@ function sendErrorResponse(res, e: Error) {
         try {
             const collectSite = req.body.collectSite;
             const url = req.body.url;
+            const category = req.body.category
             key = `${collectSite}==${url}`;
             if (!await waitQueue(key, collectSite, res)) {
                 return;
             }
 
-            let item = null;
+            let coltBsUrlItemList = null;
             try {
-                let CLASS_PATH = validator.validateClassPath(service.detail, collectSite);
-                let task = new DetailTask(collectSite, CLASS_PATH, chromeConfig);
-                item = await task.execute(url, cnt++);
-                cnt = cnt > 300 ? 0 : cnt;
+
+                let CLASS_PATH = validator.validateClassPath(service.list, collectSite);
+                const task = new ListTask(collectSite, CLASS_PATH, chromeConfig)
+                coltBsUrlItemList = await task.listExecute(category);
+
             } catch (e) {
-                logger.error(e.stack);
+                logger.error("listTask error", e);
                 sendErrorResponse(res, e);
                 delete urls[key];
                 return
             }
 
-            logger.info(`item: ${item}`);
+            logger.info(`bsUrlItemList: ${coltBsUrlItemList}`);
+
             res.send({
-                type: getClassType(item),
-                item: JSON.parse(JSON.stringify(item))
+                type: getClassType(coltBsUrlItemList),
+                item: JSON.parse(JSON.stringify(coltBsUrlItemList))
             });
 
             delete urls[key];
             return
         } catch (e) {
-            logger.error(e.stack);
+            logger.error('post error', e);
             sendErrorResponse(res, e);
             if (key !== '') {
                 delete urls[key]
