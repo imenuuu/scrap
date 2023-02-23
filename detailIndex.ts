@@ -1,4 +1,5 @@
 import {DetailTask} from "./src/task/DetailTask";
+import {ListTask} from "./src/task/ListTask";
 
 const logger = require('./src/config/logger/Logger');
 const express = require('express');
@@ -11,7 +12,8 @@ const service = require('./src/config/service.json');
 const validator = require('./src/util/ValidatorUtil');
 const ColtItem = require("./src/dto/ColtItem");
 
-const API_PATH = '/acq/node/detail';
+let taskType = 'list'
+const API_PATH = '/acq/node/'+taskType;
 const MAX_CONNECTIONS = 1;
 const MAX_IDLE_CONNECTIONS = 10;
 const urls = {};
@@ -108,6 +110,7 @@ function sendErrorResponse(res, e: Error) {
         try {
             const collectSite = req.body.collectSite;
             const url = req.body.url;
+            const category = req.body.category
             key = `${collectSite}==${url}`;
             if (!await waitQueue(key, collectSite, res)) {
                 return;
@@ -115,9 +118,17 @@ function sendErrorResponse(res, e: Error) {
 
             let item = null;
             try {
-                let CLASS_PATH = validator.validateClassPath(service.detail, collectSite);
-                let task = new DetailTask(collectSite, CLASS_PATH, chromeConfig);
-                item = await task.execute(url, cnt++);
+                let task
+
+                if (taskType == "detail") {
+                    let CLASS_PATH = validator.validateClassPath(service.detail, collectSite);
+                    task = new DetailTask(collectSite, CLASS_PATH, chromeConfig);
+                } else {
+                    let CLASS_PATH = validator.validateClassPath(service.list, collectSite);
+                    task = new ListTask(collectSite, CLASS_PATH, chromeConfig)
+                }
+
+                item = await task.listExecute(category);
                 cnt = cnt > 300 ? 0 : cnt;
             } catch (e) {
                 logger.error("detailTask error", e);
