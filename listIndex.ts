@@ -105,9 +105,8 @@ function sendErrorResponse(res, e: Error) {
         let key = '';
         try {
             const collectSite = req.body.collectSite;
-            const url = req.body.url;
             const category = req.body.category
-            key = `${collectSite}==${url}`;
+            key = `${collectSite}==${category}`;
             if (!await waitQueue(key, collectSite, res)) {
                 return;
             }
