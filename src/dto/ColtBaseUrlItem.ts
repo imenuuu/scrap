@@ -2,24 +2,27 @@ class ColtBaseUrlItem {
 
     constructor() {
     }
-
-    collectSite : string = '';
+    id : number = 0
     url : string = '';
-    type : string ='';
+    collectSite : string = '';
     bestItemYn : number = 0;
-    specExhibtnYn : number = 0;
+    bestRank : number = -1;
+    eventYn : number = 0;
     newYn : number = 0;
+    type : string ='';
+    newRank : number = -1;
     itemNum : string = '';
-    collectDay : string = '';
-    missHandlingPeriod : number = 0;
+    collectDate : string = '';
+    procDt : string ='1900-01-01';
     actPoint : number = 0;
+    uptDt : string = '';
+    missDateCnt : number = 0;
+    specExhibtnYn : number = 0;
     addInfo : string = '{}';
     sellEndYn : string = '0';
-    procDt : string ='1900-01-01';
     preProcDt : string = '1900-01-01';
     status : number = 1;
     regDt : string = '';
-    uptDt : string = '';
     expiredDt : '';
 
     ColtBaseUrlCate = {
