@@ -11,7 +11,8 @@ import type {ColtItemSiteSellHis} from "./ColtItemSiteSellHis";
 
 class ColtBaseUrlItem {
 
-    constructor() {
+    constructor(coltShelfItem : ColtShelfItem) {
+        this.coltShelfItem = coltShelfItem;
     }
 
     id: number = 0

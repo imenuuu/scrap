@@ -1,17 +1,22 @@
+import type {List} from "../site/list/List";
+import type {ColtBaseUrlItem} from "../dto/ColtBaseUrlItem";
+
 export class ListTask {
-    private _collectSite: any;
-    private _dirName: any;
-    private _config: any;
+    private readonly _collectSite: string;
+    private readonly _classPath: string;
+    private readonly _config: { [key: string]: any; };
 
     constructor(collectSite, dirName, chromeConfig) {
         this._collectSite = collectSite;
-        this._dirName = dirName;
+        this._classPath = dirName;
         this._config = chromeConfig;
     }
 
-    async listExecute(category) {
+    async execute(category) : Promise<Array<ColtBaseUrlItem>> {
 
-        const listClass = require(`${this._dirName}`)
+        const listClassModule = require(this._classPath);
+        const listClass = Object.values(listClassModule)[0] as
+            new (config: { [key: string]: any; }, collectSite: string, cnt: number) => List;
         const list = new listClass(this._config, this._collectSite, 0);
         const item = await list.getItemUrls(category);
         return item;

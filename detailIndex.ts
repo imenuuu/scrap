@@ -11,7 +11,6 @@ const chromeConfig = require('./src/config/chrome/ChromeConfig').options;
 const service = require('./src/config/service.json');
 const validator = require('./src/util/ValidatorUtil');
 
-let taskType = 'list'
 const API_PATH = '/acq/node/detail';
 const MAX_CONNECTIONS = 1;
 const MAX_IDLE_CONNECTIONS = 10;

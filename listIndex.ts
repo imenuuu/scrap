@@ -9,7 +9,7 @@ const bodyParser = require('body-parser');
 const chromeConfig = require('./src/config/chrome/ChromeConfig').options;
 const service = require('./src/config/service.json');
 const validator = require('./src/util/ValidatorUtil');
-const ColtBaseUrlItem = require("./src/dto/ColtBaseUrlItem");
+
 
 const API_PATH = '/acq/node/list';
 const MAX_CONNECTIONS = 1;
@@ -115,9 +115,9 @@ function sendErrorResponse(res, e: Error) {
             let coltBsUrlItemList = null;
             try {
 
-                let CLASS_PATH = validator.validateClassPath(service.list, collectSite);
-                const task = new ListTask(collectSite, CLASS_PATH, chromeConfig)
-                coltBsUrlItemList = await task.listExecute(category);
+                let classPath = validator.validateClassPath(service.list, collectSite);
+                const task = new ListTask(collectSite, classPath, chromeConfig)
+                coltBsUrlItemList = await task.execute(category);
 
             } catch (e) {
                 logger.error("listTask error", e);
