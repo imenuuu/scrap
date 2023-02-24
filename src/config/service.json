@@ -6,11 +6,11 @@
     "detail" : [
         {
             "COLLECT_SITE" : "lg.dns-shop.ru",
-            "CLASS_PATH" : "DnsDetail"
+            "CLASS_PATH" : "../site/detail/dns/DnsDetail"
         },
         {
             "COLLECT_SITE" : "top.naverstore.com",
-            "CLASS_PATH" : "NaverDetail"
+            "CLASS_PATH" : "../site/detail/naver/NaverDetail"
         },
         {
             "COLLECT_SITE" : "top.gsshop.com",
@@ -18,9 +18,9 @@
         },
         {
             "COLLECT_SITE" : "lg.datart.cz",
-            "CLASS_PATH" : "DatartDetail"
+            "CLASS_PATH" : "../site/detail/datart/DatartDetail"
         }
-        
+
     ],
 
     "LIST_PUPPET_PROFILE" : "../../puppet_profile/detail",

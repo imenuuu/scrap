@@ -116,12 +116,10 @@ function sendErrorResponse(res, e: Error) {
 
             let item = null;
             try {
-
                 let classPath = validator.validateClassPath(service.detail, collectSite);
                 const task = new DetailTask(collectSite, classPath, chromeConfig);
                 item = await task.execute(url, cnt);
                 cnt = cnt > 300 ? 0 : cnt;
-
             } catch (e) {
                 logger.error(e.stack);
                 sendErrorResponse(res, e);

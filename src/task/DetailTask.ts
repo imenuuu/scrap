@@ -1,8 +1,5 @@
 import type {Detail} from "../site/detail/Detail";
 import type {ColtItem} from "../dto/ColtItem";
-import {NaverDetail} from "../site/detail/naver/NaverDetail";
-import {DnsDetail} from "../site/detail/dns/DnsDetail";
-import {DatartDetail} from "../site/detail/datart/DatartDetail";
 
 export class DetailTask {
     private readonly _collectSite: string;
@@ -15,19 +12,22 @@ export class DetailTask {
         this._config = chromeConfig;
     }
 
-    private detailType = {
-        NaverDetail: NaverDetail,
-        DnsDetail: DnsDetail,
-        DatartDetail: DatartDetail
-    };
+    // private detailType = {
+    //     NaverDetail: NaverDetail,
+    //     DnsDetail: DnsDetail,
+    //     DatartDetail: DatartDetail
+    // };
 
-    detailClass(className: string)
-        : new (config: { [key: string]: any; }, collectSite: string, cnt: number) => Detail {
-        return this.detailType[className];
-    }
+    // detailClass(className: string)
+    //     : new (config: { [key: string]: any; }, collectSite: string, cnt: number) => Detail {
+    //     return this.detailType[className];
+    // }
 
     async execute(url, cnt): Promise<ColtItem> {
-        const detail = new (this.detailClass(this._classPath))(this._config, this._collectSite, cnt);
+        const detailClassModule = require(this._classPath);
+        const detailClass = Object.values(detailClassModule)[0] as
+            new (config: { [key: string]: any; }, collectSite: string, cnt: number) => Detail;
+        const detail = new detailClass(this._config, this._collectSite, cnt);
         const item = await detail.extractItemDetail(url);
         return item;
     }
