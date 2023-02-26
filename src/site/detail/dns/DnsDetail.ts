@@ -60,7 +60,7 @@ class DnsDetail implements Detail {
                 const title = detailPage('h1.product-card-top__title').text();
                 const item_num = await this.getItemNum(url);
                 if (!await validator.isNotUndefinedOrEmpty(title)) {
-                    await makeItem.makeNotFoundColtItem(cItem, url, this.collectSite, item_num, detailPage);
+                    await makeItem.makeNotFoundColtItem(cItem, url, this.collectSite, item_num, detailPage, '17');
                     return cItem;
                 }
                 logger.info('ITEM_NUM: ' + item_num + ' TITLE:' + title);
@@ -89,16 +89,16 @@ class DnsDetail implements Detail {
                 if (Object.is(orgPrice, NaN)) orgPrice = 0;
                 if (Object.is(disPrice, NaN)) disPrice = 0;
                 let ivtAddPrice = orgPrice;
+
                 if (disPrice > 0) {
                     const coltDis = new ColtItemDiscount();
                     ivtAddPrice = disPrice;
                     let discountRate = Math.round((orgPrice - disPrice) / orgPrice * 100);
-                    coltDis.discountPrice = String(disPrice);
-                    coltDis.discountRate = String(discountRate);
+                    await makeItem.makeColtItemDisCount(coltDis, disPrice, discountRate)
                     cItem.coltItemDiscountList.push(coltDis);
                 }
 
-                await makeItem.makeColtItem(cItem, url, this.collectSite, 'Dns', '017',title, item_num, category,
+                await makeItem.makeColtItem(cItem, url, this.collectSite, 'Dns', '017', title, item_num, category,
                     brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice, disPrice);
                 //--option--
                 let optionList = await this.getOptionInfo(detailPage);
@@ -200,14 +200,7 @@ class DnsDetail implements Detail {
         }
 
         const ivt = new ColtItemIvt();
-        ivt.stockId = product_code;
-        ivt.addPrice = ivtAddPrice;
-        ivt.colorOption = option1;
-        ivt.sizeOption = option2;
-        ivt.styleOption = option3;
-        ivt.giftOption = option4;
-        ivt.option = stockOption;
-        ivt.stockAmount = stockAmout;
+        await makeItem.makeColtItemIvt(ivt, product_code, ivtAddPrice, option1, option2, option3, option4, stockOption, stockAmout)
         cItem.coltItemIvtList.push(ivt);
     }
 
@@ -361,7 +354,7 @@ class DnsDetail implements Detail {
                 let videoJson;
 
                 let response = await videoPage.goto(reqUrl, {timeout: 30000});
-                await wait.sleep(1);
+                await wait.sleep(3);
                 let jsonArr = JSON.parse(await response.text());
                 let tabs = jsonArr.data.tabs;
 

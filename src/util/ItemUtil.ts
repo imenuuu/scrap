@@ -2,6 +2,7 @@ import type {ColtItem} from "../dto/ColtItem";
 import type {ColtBaseUrlItem} from "../dto/ColtBaseUrlItem";
 import type {ColtBaseUrlCate} from "../dto/ColtBaseUrlCate";
 import type {ColtBaseUrlRank} from "../dto/ColtBaseUrlRank";
+import type {ColtItemDiscount} from "../dto/ColtItemDiscount";
 
 import {ColtImage} from "../dto/ColtImage";
 import {ColtItemIvt} from "../dto/ColtItemIvt";
@@ -28,7 +29,24 @@ export async function makeColtItem(cItem: ColtItem, url, collectSite, siteName, 
     cItem.addInfo = addInfo;
 }
 
-export async function makeNotFoundColtItem(cItem: ColtItem, collectSite, url, siteName, priceStdCd, itemNum) {
+export async function makeColtItemIvt(cIvt: ColtItemIvt, stockId, addPrice, colorOption, sizeOption, styleOption,
+                                      giftOption, option, stockAmount) {
+    cIvt.stockId = stockId;
+    cIvt.addPrice = addPrice;
+    cIvt.colorOption = colorOption;
+    cIvt.sizeOption = sizeOption;
+    cIvt.styleOption = styleOption;
+    cIvt.giftOption = giftOption;
+    cIvt.option = option;
+    cIvt.stockAmount = stockAmount;
+}
+
+export async function makeColtItemDisCount(cDis: ColtItemDiscount, discountPrice, discountRate) {
+    cDis.discountPrice = discountPrice
+    cDis.discountRate = discountRate
+}
+
+export async function makeNotFoundColtItem(cItem: ColtItem, url, collectSite, siteName, priceStdCd, itemNum) {
     cItem.collectSite = collectSite;
     cItem.collectUrl = url;
     cItem.siteName = siteName;
