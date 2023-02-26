@@ -6,7 +6,8 @@ import type {List} from "../List";
 
 const logger = require('../../../config/logger/Logger');
 const service = require('../../../config/service.json');
-const puppeteer = require('puppeteer');
+const makeItem = require('../../../util/ItemUtil')
+const puppeteer = require('../../../util/PuppeteerUtil');
 const cheerio = require('cheerio');
 let dateUtils = require('../../../util/Dateutil');
 
@@ -19,18 +20,12 @@ class DnsKeywordList implements List {
 
     _glbConfig: { [key: string]: any; };
     collectSite: string;
-    luminati_zone: string;
-    OXYLABS: boolean;
-    LUMINATI: boolean;
     cnt: number;
 
     constructor(config, collectSite, cnt) {
         this._glbConfig = config;
         this._glbConfig.userDataDir = service.LIST_PUPPET_PROFILE;
         this.collectSite = collectSite;
-        this.OXYLABS = service.OXYLABS;
-        this.LUMINATI = service.LUMINATI;
-        this.luminati_zone = 'lum-customer-epopcon-zone-zone_ru';
         this.cnt = cnt;
     }
 
@@ -66,10 +61,7 @@ class DnsKeywordList implements List {
 
         stdt = await getTurn();
 
-        const browser = await puppeteer.launch(this._glbConfig);
-        const context = await browser.createIncognitoBrowserContext();
-        const page = await context.newPage();
-        await pageSet(page);
+        const [browser, context, page] = await puppeteer.getPage(this._glbConfig)
 
         let coltBaseUrlList = new Array();
         let detailPage
@@ -79,9 +71,9 @@ class DnsKeywordList implements List {
         try {
             let url = categoryList.cateUrl;
             try {
-                await page.goto(url, {waitUntil: ["domcontentloaded"], timeout: 60000});
+                await page.goto(url, {waitUntil: ["domcontentloaded"], timeout: 80000});
                 await page.waitForSelector('body > div.container.category-child > div > div.products-page__content > div.products-page__list > div.products-list > div > div > div > div.catalog-product__image > a > picture > img', {visible: true});
-                await page.waitForSelector('div.product-buy__price', {timeout: 30000});
+                await page.waitForSelector('div.product-buy__price', {timeout: 80000});
                 await page.mouse.wheel({deltaY: 1000});
                 await page.mouse.wheel({deltaY: 1000});
                 await page.mouse.wheel({deltaY: 1000});
@@ -150,16 +142,14 @@ class DnsKeywordList implements List {
             logger.error(error.stack);
 
         } finally {
-            //global.args.pop();
-            await page.close()
-            await browser.close();
-
+            await puppeteer.close(browser, page, this._glbConfig)
         }
 
         return coltBaseUrlList;
     }
 
 }
+
 async function sleep(sec) {
     sec = sec * 1000
     return new Promise((resolve) => {
@@ -299,39 +289,15 @@ async function parsingItemList(categoryList, detailPage, pageNum, coltBaseUrlLis
         }
         let regex = /product\/(\w+)/gm;
         let itemNum = regex.exec(url)[1];
-        bsItem.itemNum = itemNum;
-        bsItem.url = url;
-        bsItem.type = 'M';
-        bsItem.newYn = stdt;
-        bsItem.collectSite = COLLECT_SITE;
-        //bsItem.regDt = dateUtils.currentDate();
-        bsItem.uptDt = dateUtils.currentDate();
-        bsItem.collectDate = dateUtils.currentDay();
-        //bsItem.expiredDt = dateUtils.expiredDt();
 
-        bsCate.cate = categoryList.name;
-        bsCate.cateUrl = categoryList.cateUrl;
-        bsCate.regDt = dateUtils.currentDate();
+        makeItem.makeColtBaseUrlItem(bsItem, url, COLLECT_SITE, itemNum)
+        makeItem.makeColtBaseCateItem(bsCate, categoryList)
+        makeItem.makeColtBaseRankItem(bsRank, rank)
+        makeItem.makeColtShelfItem(bsItem, url, COLLECT_SITE, SITE_NAME, goodsName, orgPrice, disPrice, totalEvalutCnt,
+            avgPoint, thumbnail, '')
+
         bsItem.coltBaseUrlCateList.push(bsCate)
-
-        bsRank.rank = rank;
-        bsRank.regDt = dateUtils.currentDate();
         bsItem.coltBaseUrlRank.push(bsRank);
-
-        bsItem.coltShelfItem.goodsName = goodsName;
-        bsItem.coltShelfItem.collectSite = COLLECT_SITE;
-        bsItem.coltShelfItem.collectUrl = url;
-        bsItem.coltShelfItem.siteName = SITE_NAME;
-        bsItem.coltShelfItem.price = orgPrice;
-        bsItem.coltShelfItem.discountPrice = disPrice;
-        bsItem.coltShelfItem.totalEvalut = totalEvalutCnt;
-        bsItem.coltShelfItem.avgPoint = avgPoint;
-        bsItem.coltShelfItem.seller = '';
-        bsItem.coltShelfItem.thumbnail = thumbnail;
-        bsItem.coltShelfItem.addInfo = '';
-        bsItem.coltShelfItem.regDt = dateUtils.currentDate();
-        bsItem.coltShelfItem.uptDt = dateUtils.currentDate();
-
         coltBaseUrlList.push(bsItem);
 
         rank++;

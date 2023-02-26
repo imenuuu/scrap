@@ -1,61 +1,44 @@
-import * as constants from "constants";
 import {ColtItem} from "../../../dto/ColtItem";
 import {ColtImage} from "../../../dto/ColtImage";
 import {ColtItemDiscount} from "../../../dto/ColtItemDiscount";
 import {ColtItemIvt} from "../../../dto/ColtItemIvt";
 import type {Detail} from "../Detail";
 
-const puppeteer = require('puppeteer');
+
 const cheerio = require('cheerio');
 const hash = require('../../../util/HashUtil');
 const {jsonToStr, strToJson} = require('../../../util/Jsonutil');
 const logger = require('../../../config/logger/Logger');
 const service = require('../../../config/service.json');
-let ipCnt;
-let ipList;
-let global;
+const wait = require('../../../util/WaitUtil')
+const makeItem = require('../../../util/ItemUtil')
+const puppeteer = require('../../../util/PuppeteerUtil')
+const validator = require('../../../util/ValidatorUtil')
+
+let global
 
 class DnsDetail implements Detail {
     _glbConfig: { [key: string]: any; };
     collectSite: string;
-    luminati_zone: string;
-    OXYLABS: boolean;
-    LUMINATI: boolean;
     cnt: number;
 
     constructor(config, collectSite, cnt) {
         this._glbConfig = config;
         this._glbConfig.userDataDir = service.DETAIL_PUPPET_PROFILE;
-        global = this._glbConfig;
+        global = this._glbConfig
         this.collectSite = collectSite;
-        this.OXYLABS = service.OXYLABS;
-        this.LUMINATI = service.LUMINATI;
-        this.luminati_zone = 'lum-customer-epopcon-zone-zone_ru';
         this.cnt = cnt;
     }
 
     async extractItemDetail(url): Promise<ColtItem> {
         try {
-            if (this.OXYLABS) {
-                let ipList = await this.getIpList();
-                let mod = (this.cnt % ipList.length);
-                let ip = ipList[mod];
-                global.args.push('--proxy-server=' + ip);
-            }
-            if (this.LUMINATI) {
-                global.args.push('--proxy-server=zproxy.lum-superproxy.io:22225');
-            }
 
-            const browser = await puppeteer.launch(global);
-            let context = await browser.createIncognitoBrowserContext();
-            const page = await context.newPage();
-            await this.pageSet(page);
-
+            const [browser, context, page] = await puppeteer.getPage(this._glbConfig)
 
             try {
                 try {
                     await page.goto(url, {waitUntil: "networkidle2"}, {timeout: 30000});
-                    await sleep(5);
+                    await wait.sleep(5);
                     await page.waitForSelector('h1.product-card-top__title', {timeout: 10000});
                     await page.waitForSelector('div.product-card-top__code', {timeout: 10000});
                     await page.waitForSelector('button.button-ui.button-ui_white.product-characteristics__expand', {timeout: 10000});
@@ -66,9 +49,9 @@ class DnsDetail implements Detail {
                     logger.error(e.message);
                     // await page.waitForSelector('span.product-card-top__avails.avails-container.avails-container_tile', {timeout: 10000});
                     // await page.waitForSelector('div.order-avail-wrap.order-avail-wrap_not-avail', {timeout: 10000});
-                    await sleep(2);
+                    await wait.sleep(2);
                 }
-                await sleep(5);
+                await wait.sleep(5);
 
 
                 let cItem = new ColtItem();
@@ -76,14 +59,14 @@ class DnsDetail implements Detail {
 
                 const title = detailPage('h1.product-card-top__title').text();
                 const item_num = await this.getItemNum(url);
-                if (!await isNotUndefinedOrEmpty(title)) {
-                    await this.makeNotFoundColtItem(cItem, url, this.collectSite, item_num, detailPage);
+                if (!await validator.isNotUndefinedOrEmpty(title)) {
+                    await makeItem.makeNotFoundColtItem(cItem, url, this.collectSite, item_num, detailPage);
                     return cItem;
                 }
                 logger.info('ITEM_NUM: ' + item_num + ' TITLE:' + title);
 
                 let category = await this.getCateInfo(detailPage);
-                if (await isNotUndefinedOrEmpty(category)) {
+                if (await validator.isNotUndefinedOrEmpty(category)) {
                     category = '(#M)' + category;
                 } else {
                     category = 'NO_CATEGORY';
@@ -93,7 +76,7 @@ class DnsDetail implements Detail {
                 let brand_name = detailPage('a.product-card-top__brand > img').attr('alt');
                 let avgPoint = detailPage('div.product-card-top__stat > a.product-card-top__rating').attr('data-rating');
                 if (avgPoint == '0') avgPoint = '0.0';
-                if (!await isNotUndefinedOrEmpty(avgPoint)) avgPoint = '0.0';
+                if (!await validator.isNotUndefinedOrEmpty(avgPoint)) avgPoint = '0.0';
                 let totalEvalutCnt = await this.getTotalEvalutCnt(detailPage);
                 let addInfo = await this.getAddInfo(detailPage, product_code);
 
@@ -115,7 +98,8 @@ class DnsDetail implements Detail {
                     cItem.coltItemDiscountList.push(coltDis);
                 }
 
-                await this.makeColtItem(cItem, url, this.collectSite, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice);
+                await makeItem.makeColtItem(cItem, url, this.collectSite, 'Dns', '017',title, item_num, category,
+                    brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice, disPrice);
                 //--option--
                 let optionList = await this.getOptionInfo(detailPage);
 
@@ -139,37 +123,13 @@ class DnsDetail implements Detail {
             } catch (error) {
                 logger.error(error.stack);
             } finally {
-                if (this.OXYLABS) global.args.pop();
-                page.close();
-                browser.close();
+                puppeteer.close(browser, page, global)
             }
         } catch (e) {
             logger.error(e.stack);
         }
     }
 
-    async getIpList() {
-        let browserOxylab = await puppeteer.launch(global);
-        let pageOxylab = await browserOxylab.newPage();
-        await pageOxylab.authenticate({
-            username: 'epopcon',
-            password: 'FChB5uEd45',
-            key: '4b33bfee-80a6-11eb-927e-901b0ec4424b'
-        });
-        let response = await pageOxylab.goto(service.OXYLABS_URL);
-        let jsonArr = JSON.parse(await response.text());
-
-        pageOxylab.close();
-        browserOxylab.close();
-
-        let ipList = [];
-        for (let json of jsonArr) {
-            let ip = json.ip;
-            let port = json.port;
-            ipList.push(ip + ':' + port);
-        }
-        return ipList;
-    }
 
     async getStockInfo(cItem, page, detailPage, url, optionList, product_code, ivtAddPrice) {
         let option1 = '';
@@ -266,7 +226,7 @@ class DnsDetail implements Detail {
                         ([...document.querySelectorAll('.product-card-top__buy > div.product-buy > button.button-ui.buy-btn')].find(element => element.textContent === 'Купить') as HTMLElement).click();
                     });
                 }
-                await sleep(8);
+                await wait.sleep(8);
                 //시간이 오래걸려 주석처리
                 // await page.reload();
                 // await page.waitForSelector('div.product-card-top.product-card-top_full > div.product-card-top__buy > div.product-buy.product-buy_one-line > button.button-ui.buy-btn.button-ui_brand.button-ui_passive-done', {timeout: 5000})
@@ -290,13 +250,13 @@ class DnsDetail implements Detail {
             });
             try {
                 await page.goto(gotoCart, {waitUntil: "networkidle2", timeout: 30000});
-                await sleep(5);
+                await wait.sleep(5);
                 await page.waitForSelector('div.cart-items__product-code', {timeout: 30000});
             } catch (error) {
-                await sleep(1);
+                await wait.sleep(1);
                 logger.error('Goto CartPage Error');
             }
-            await sleep(3);
+            await wait.sleep(3);
             const cartContent = cheerio.load(await page.content());
             cartContent('div.cart-items__content-container').each((index, el) => {
                 let cartItem = cartContent(el);
@@ -312,7 +272,7 @@ class DnsDetail implements Detail {
                 ([...document.querySelectorAll('p.remove-button__title')].find(element => element.textContent === 'Удалить') as HTMLElement).click();
             });
 
-            await sleep(1);
+            await wait.sleep(1);
 
         } catch (error) {
             logger.error('Reqeust Cart Error!');
@@ -322,23 +282,6 @@ class DnsDetail implements Detail {
             return stockAmout;
         }
 
-    }
-
-    async makeColtItem(cItem: ColtItem, url, collectSite, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice) {
-        cItem.collectSite = collectSite;
-        cItem.collectUrl = url;
-        cItem.siteName = 'DNS';
-        cItem.priceStdCd = '017';
-
-        cItem.itemNum = item_num;
-        cItem.goodsName = title;
-        cItem.goodsCate = category;
-        cItem.brandName = brand_name;
-        cItem.price = orgPrice;
-        cItem.sitePrice = orgPrice;
-        cItem.totalEvalCnt = totalEvalutCnt;
-        cItem.fivePoint = avgPoint;
-        cItem.addInfo = addInfo;
     }
 
     async makeNotFoundColtItem(cItem: ColtItem, url, collectSite, item_num, detailPage) {
@@ -416,10 +359,9 @@ class DnsDetail implements Detail {
             const videoPage = await context.newPage();
             try {
                 let videoJson;
-                await this.pageSet(videoPage);
 
                 let response = await videoPage.goto(reqUrl, {timeout: 30000});
-                await sleep(1);
+                await wait.sleep(1);
                 let jsonArr = JSON.parse(await response.text());
                 let tabs = jsonArr.data.tabs;
 
@@ -480,8 +422,8 @@ class DnsDetail implements Detail {
         addinfoObj['Product code'] = product_code;
         let service_rating = detailPage('div.product-card-top__stat > a.product-card-top__service-rating').text().replaceAll(/,/gm, '.');
         let service_comment = detailPage('div.product-card-top__stat > a.product-card-top__comments').text().trim();
-        if (await isNotUndefinedOrEmpty(service_comment)) addinfoObj['Communicator'] = service_comment;
-        if (await isNotUndefinedOrEmpty(service_rating)) addinfoObj['Reliability assessment'] = service_rating;
+        if (await validator.isNotUndefinedOrEmpty(service_comment)) addinfoObj['Communicator'] = service_comment;
+        if (await validator.isNotUndefinedOrEmpty(service_rating)) addinfoObj['Reliability assessment'] = service_rating;
 
 
         detailPage('div.product-characteristics div.product-characteristics__group > div.product-characteristics__spec').each((index, el) => {
@@ -490,7 +432,7 @@ class DnsDetail implements Detail {
             key = key.replaceAll(/^\s+|\s+$/gm, "");
             let value = addInfo.find('> div.product-characteristics__spec-value').text();
             value = value.replaceAll(/^\s+|\s+$/gm, "");
-            if (isNotUndefinedOrEmpty(key) && isNotUndefinedOrEmpty(value)) {
+            if (validator.isNotUndefinedOrEmpty(key) && validator.isNotUndefinedOrEmpty(value)) {
                 if (key.includes('Модель')) addinfoObj[key] = value;
             }
         });
@@ -529,56 +471,6 @@ class DnsDetail implements Detail {
         let itemNum = regex.exec(url)[1];
         return itemNum;
     }
-
-
-    async pageSet(page) {
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, 'webdriver', {
-                get: () => false
-            });
-        });
-
-        if (this.OXYLABS) {
-            await page.authenticate({
-                username: 'epopcon',
-                password: 'FChB5uEd45',
-                key: '4b33bfee-80a6-11eb-927e-901b0ec4424b'
-            });
-
-        }
-
-        if (this.LUMINATI) {
-            await page.authenticate({
-                username: this.luminati_zone,
-                password: 'jhwfsy8ucuh2'
-            });
-        }
-
-        await page.setDefaultTimeout(50000000);
-
-        await page.setDefaultNavigationTimeout(30000);
-        await page.setDefaultTimeout(30000);
-        await page.setUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36");
-    }
-
-}
-
-async function isNotUndefinedOrEmpty(value) {
-    if (value == "" ||
-        value == null ||
-        value == undefined) {
-        return false;
-    } else {
-        return true;
-    }
-}
-
-
-async function sleep(sec) {
-    sec = sec * 1000;
-    return new Promise((resolve) => {
-        setTimeout(resolve, sec);
-    });
 }
 
 
