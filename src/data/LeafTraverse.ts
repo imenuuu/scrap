@@ -1,5 +1,8 @@
 import type {Leaf} from "./Leaf";
 import type {TargetLeaf} from "./TargetLeaf";
+import {CategoryData} from "./CategoryData";
+
+const Logger = require("../config/logger/Logger");
 
 class LeafTraverse{
 
@@ -129,6 +132,105 @@ class LeafTraverse{
         return false;
     }
 
+    toCategoryList() :Array<CategoryData>
+	{
+		let oneDepth:Array<Leaf> =  this.rootLeaf.childrenLeaf;
+		let cateList:Array<CategoryData> = [];
+		
+		if(oneDepth !=null && oneDepth.length > 0)
+		{
+			for(let l1 of oneDepth)
+			{
+				if(l1.isLastLeaf() && (l1.url != null || l1.url != undefined))
+				{
+					let cate:CategoryData = new CategoryData();
+					cate.categoryNames = l1.getLeafNames();
+					cate.categoryUrl = l1.url;
+					cateList.push(cate);
+				}else if(l1.isLastLeaf()) {
+					let t:Leaf = this.getLastLeafWithUrl(l1.parentLeaf);
+					if(t != null) {
+						let cate:CategoryData = new CategoryData();
+						cate.categoryNames = t.getLeafNames();
+						cate.categoryUrl = t.url;
+						if(!cateList.includes(cate)){
+							cateList.push(cate);
+						}
+					}
+					
+				}
+				this.traverse(l1,cateList);
+			}
+			
+			if(this.tLeaf !=null)
+			{
+                let cateListCopy:Array<CategoryData> = [];
+                for(let cate of cateList){
+                    if(cate.getCategoryString.replaceAll(" ", "").includes(this.tLeaf.filter))
+                        cateListCopy.push(cate)
+                }
+				cateList = cateListCopy;
+			}
+		}		
+		return cateList;
+	}
+
+    getLastLeafWithUrl(f:Leaf):Leaf
+	{		
+		if(f.url != null ||f.url != undefined ||f.url != "")
+		{
+			return f;
+		}else {
+			f = f.parentLeaf;
+			if(f!=null)
+			{
+				return this.getLastLeafWithUrl(f);
+			}
+		}
+		
+		return null;
+	}
+
+    traverse(leaf:Leaf, cateList:Array<CategoryData>)
+	{
+		let children:Array<Leaf> = leaf.childrenLeaf;
+		
+		if(children !=null && children.length > 0)
+		{
+			for(let l of children)
+			{
+				if(!l.isLastLeaf())
+				{
+					this.traverse(l,cateList);
+				}else 
+				{
+					if(l.url != null ||l.url != undefined ||l.url != "")
+					{
+						let cate:CategoryData = new CategoryData();
+						cate.categoryNames = l.getLeafNames();
+						cate.categoryUrl = l.url;
+						cateList.push(cate);
+						
+					}else {
+						
+						let t:Leaf = this.getLastLeafWithUrl(l.parentLeaf);
+						
+						if(t !=null)
+						{
+							let cate:CategoryData = new CategoryData();
+							cate.categoryNames = t.getLeafNames();
+							cate.categoryUrl = t.url;
+							if(!cateList.includes(cate)){
+								cateList.push(cate);
+							}
+						}
+					}
+					
+				}
+				
+			}
+		}
+	}
 }
 export {LeafTraverse}
 
