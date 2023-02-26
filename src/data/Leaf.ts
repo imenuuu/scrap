@@ -39,7 +39,7 @@ class Leaf{
 
     getLeafNames() :Array<string>
 	{
-        let ppList:Array<string> = this.parentLeafName;
+        let ppList:Array<string> = this.parentLeafName.slice();
 		ppList.push(this.name);
 		
 		return ppList;
