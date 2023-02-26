@@ -1,0 +1,98 @@
+import type {ColtItem} from "../dto/ColtItem";
+import type {ColtBaseUrlItem} from "../dto/ColtBaseUrlItem";
+import type {ColtBaseUrlCate} from "../dto/ColtBaseUrlCate";
+import type {ColtBaseUrlRank} from "../dto/ColtBaseUrlRank";
+
+import {ColtImage} from "../dto/ColtImage";
+import {ColtItemIvt} from "../dto/ColtItemIvt";
+
+import dateUtils from "./Dateutil";
+import hash from "./HashUtil";
+import logger from "../config/logger/Logger";
+
+
+export async function makeColtItem(cItem: ColtItem, url, collectSite, siteName, priceStdCd, goodsName, itemNum, category,
+                                   brandName, fivePoint, totalEvalutCnt, addInfo, price, sitePrice) {
+    cItem.collectSite = collectSite;
+    cItem.collectUrl = url;
+    cItem.siteName = siteName;
+    cItem.priceStdCd = priceStdCd;
+    cItem.itemNum = itemNum;
+    cItem.goodsName = goodsName;
+    cItem.goodsCate = category;
+    cItem.brandName = brandName;
+    cItem.price = price;
+    cItem.sitePrice = sitePrice;
+    cItem.totalEvalCnt = totalEvalutCnt;
+    cItem.fivePoint = fivePoint;
+    cItem.addInfo = addInfo;
+}
+
+export async function makeNotFoundColtItem(cItem: ColtItem, collectSite, url, siteName, priceStdCd, itemNum) {
+    cItem.collectSite = collectSite;
+    cItem.collectUrl = url;
+    cItem.siteName = siteName;
+    cItem.priceStdCd = priceStdCd;
+
+    cItem.itemNum = itemNum;
+    cItem.goodsName = 'Page Not Found';
+    cItem.goodsCate = 'NO_CATEGORY';
+    cItem.brandName = 'NO_BRANDNAME';
+    cItem.price = '0';
+    cItem.sitePrice = '0';
+    cItem.totalEvalCnt = 0;
+    cItem.fivePoint = 0.0;
+    cItem.addInfo = '';
+
+    const coltImage = new ColtImage();
+    coltImage.goodsImage = 'no image';
+    coltImage.hash = Number(hash.toHash('no image'));
+    cItem.coltImageList.push(coltImage);
+
+    const ivt = new ColtItemIvt();
+    ivt.stockId = itemNum;
+    ivt.addPrice = 0;
+    ivt.option = 'Not Found';
+    ivt.stockAmount = -999;
+    cItem.coltItemIvtList.push(ivt);
+
+    logger.info('Not Found Page! , ITEM_NUM: ' + itemNum);
+}
+
+export async function makeColtBaseUrlItem(bsItem: ColtBaseUrlItem, url, collectSite, itemNum) {
+    bsItem.itemNum = itemNum;
+    bsItem.url = url;
+    bsItem.type = 'M';
+    bsItem.newYn = 0;
+    bsItem.collectSite = collectSite;
+    bsItem.uptDt = dateUtils.currentDate();
+    bsItem.collectDate = dateUtils.currentDay();
+}
+
+export async function makeColtBaseCateItem(bsCate: ColtBaseUrlCate, categoryList) {
+    bsCate.cate = categoryList.name;
+    bsCate.cateUrl = categoryList.cateUrl;
+    bsCate.regDt = dateUtils.currentDate();
+}
+
+export async function makeColtBaseRankItem(bsRank: ColtBaseUrlRank, rank) {
+    bsRank.rank = rank;
+    bsRank.regDt = dateUtils.currentDate();
+}
+
+export async function makeColtShelfItem(bsItem: ColtBaseUrlItem, url, collectSite, siteName, goodsName, orgPrice, disPrice,
+                                        totalEvalutCnt, avgPoint, thumbnail, addInfo) {
+    bsItem.coltShelfItem.goodsName = goodsName;
+    bsItem.coltShelfItem.collectSite = collectSite;
+    bsItem.coltShelfItem.collectUrl = url;
+    bsItem.coltShelfItem.siteName = siteName;
+    bsItem.coltShelfItem.price = orgPrice;
+    bsItem.coltShelfItem.discountPrice = disPrice;
+    bsItem.coltShelfItem.totalEvalut = totalEvalutCnt;
+    bsItem.coltShelfItem.avgPoint = avgPoint;
+    bsItem.coltShelfItem.seller = '';
+    bsItem.coltShelfItem.thumbnail = thumbnail;
+    bsItem.coltShelfItem.addInfo = addInfo;
+    bsItem.coltShelfItem.regDt = dateUtils.currentDate();
+    bsItem.coltShelfItem.uptDt = dateUtils.currentDate();
+}

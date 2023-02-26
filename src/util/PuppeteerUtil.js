@@ -1,27 +1,29 @@
-const proxy = require("./ProxyUtil");
-const service = require('../../src/config/service.json')
 import puppeteer from 'puppeteer'
 
+const proxy = require("./ProxyUtil");
 
-exports.getBrowser = async function(global){
-    return await puppeteer.launch(global)
-}
 
-exports.getContext = async function(browser){
-    return await browser.createIncognitoBrowserContext()
-}
+exports.getPage = async function (global) {
+    const browser = await puppeteer.launch(global)
+    let context = ''
 
-exports.getPage = async function (context) {
-    const page = await context.newPage();
-    await proxy.pageSet(page)
-    return page
-}
+    if (global.proxyConfig['contextUse'])
+        context = await browser.createIncognitoBrowserContext()
+    const page = context === '' ? await browser.newPage() : await context.newPage();
 
-exports.closePage = async function (browser, page) {
+    await proxy.pageSet(page, global)
+    await proxy.pushProxy(global)
 
-    if (browser.isConnected()) {
+    return [browser, context, page]
+};
+
+exports.close = async function (browser, page, global) {
+    if (!page.isClosed()) {
         await page.close()
-        await browser.close()
     }
+    if (browser.isConnected()) {
+        await browser.close()
+        await proxy.popProxy(global)
+    }
+};
 
-}
