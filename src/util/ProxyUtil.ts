@@ -1,27 +1,32 @@
 const service = require("../config/service.json");
 const request = require('request');
 
-let ipList = ''
+let ipList
 
 
-exports.pushProxy = async function (global) {
+export async function pushProxy(global) {
     let ip = 'zproxy.lum-superproxy.io:22225'
 
     if (global.proxyConfig['proxyName'] === 'oxyLab' || service.OXYLAB) {
-        if (ipList === '')
+        if (ipList === undefined)
             ipList = await getOxyLabIpList()
         ip = ipList[Math.random() % ipList.length]
     }
 
     if (!global.args[global.args.length - 1].includes('--proxy-server='))
         global.args.push('--proxy-server=' + ip);
-};
+}
 
 async function getOxyLabIpList() {
 
-    let data = await oxyLabIpList()
+    const data = await oxyLabIpList()
+    let jsonArr
     let ipList = [];
-    let jsonArr = JSON.parse(data)
+
+    if (typeof data === "string") {
+        jsonArr = JSON.parse(data)
+    }
+
     for (let json of jsonArr) {
         let ip = json.ip;
         let port = json.port;
@@ -29,7 +34,7 @@ async function getOxyLabIpList() {
     }
 
     return ipList;
-};
+}
 
 function oxyLabIpList() {
     return new Promise(function (resolve, reject) {
@@ -46,13 +51,13 @@ function oxyLabIpList() {
     })
 }
 
-exports.popProxy = async function (global) {
+export async function popProxy(global) {
     if (global.args[global.args.length - 1].includes('--proxy-server='))
         global.args.pop()
-};
+}
 
 
-exports.pageSet = async function (page, global) {
+export async function pageSet(page, global) {
     await page.evaluateOnNewDocument(() => {
         Object.defineProperty(navigator, 'webdriver', {
             get: () => false
@@ -71,9 +76,9 @@ exports.pageSet = async function (page, global) {
     await page.setUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36");
 };
 
-getPageCredential = async function (global) {
+async function getPageCredential(global) {
     return {
         username: global.proxyConfig.username,
         password: global.proxyConfig.password,
     }
-};
+}

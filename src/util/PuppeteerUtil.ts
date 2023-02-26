@@ -3,13 +3,13 @@ import puppeteer from 'puppeteer'
 const proxy = require("./ProxyUtil");
 
 
-exports.getPage = async function (global) {
+export async function getPage(global) {
     const browser = await puppeteer.launch(global)
-    let context = ''
+    let context
 
     if (global.proxyConfig['contextUse'])
         context = await browser.createIncognitoBrowserContext()
-    const page = context === '' ? await browser.newPage() : await context.newPage();
+    const page = context === undefined ? await browser.newPage() : await context.newPage();
 
     await proxy.pageSet(page, global)
     await proxy.pushProxy(global)
@@ -17,7 +17,7 @@ exports.getPage = async function (global) {
     return [browser, context, page]
 };
 
-exports.close = async function (browser, page, global) {
+export async function close(browser, page, global) {
     if (!page.isClosed()) {
         await page.close()
     }
