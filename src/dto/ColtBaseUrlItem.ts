@@ -43,9 +43,9 @@ class ColtBaseUrlItem {
 
     coltBaseUrlCateList: Array<ColtBaseUrlCate> = [];
     coltBaseEvtList: Array<ColtBaseEvt> = [];
-    coltBaseUrlRank: Array<ColtBaseUrlRank> = [];
-    coltBaseUrlSchedule: Array<ColtBaseUrlSchedule> = [];
-    coltBaseUrlItemNaverList: Array<ColtBaseUrlItemNaverList> = [];
+    coltBaseUrlRank: ColtBaseUrlRank;
+    coltBaseUrlSchedule: ColtBaseUrlSchedule;
+    coltBaseUrlItemNaverList: ColtBaseUrlItemNaverList;
     coltBaseUrlMaster: ColtBaseUrlMaster;
     coltShelfItem: ColtShelfItem;
     coltBaseCateBrandRank: ColtBaseCateBrandRank;
