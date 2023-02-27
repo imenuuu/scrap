@@ -279,9 +279,9 @@ async function parsingItemList(categoryList, detailPage, pageNum, coltBaseUrlLis
         makeItem.makeColtShelfItem(bsItem, url, COLLECT_SITE, SITE_NAME, goodsName, orgPrice, disPrice, totalEvalutCnt,
             avgPoint, thumbnail, '')
 
-        bsItem.coltBaseUrlCateList.push(bsCate)
-        bsItem.coltBaseUrlRank.push(bsRank);
-        coltBaseUrlList.push(bsItem);
+        bsItem.coltBaseUrlCateList.= bsCate
+        bsItem.coltBaseUrlRank = bsRank;
+        coltBaseUrlList.push(bsItem); //
 
         rank++;
     });
