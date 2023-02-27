@@ -1,5 +1,6 @@
 import {ListTask} from "./src/task/ListTask";
 import {logger} from "./src/config/logger/Logger";
+import * as ApiUtil from "./src/util/ApiUtil";
 
 const express = require('express');
 const app = express();
@@ -12,22 +13,7 @@ const validator = require('./src/util/ValidatorUtil');
 
 
 const API_PATH = '/acq/node/list';
-const MAX_CONNECTIONS = 1;
-const MAX_IDLE_CONNECTIONS = 10;
 const urls = {};
-const priorities = {};
-
-function sleep(ms) {
-    return new Promise((resolve) => {
-        setTimeout(resolve, ms);
-    });
-}
-
-function getPrimaryPriorityKey() {
-    return Object.keys(priorities).sort((k1, k2) => {
-        return priorities[k1] - priorities[k2];
-    })[0];
-}
 
 const appSetting = async function (app) {
     app.listen(port, () => {
@@ -38,51 +24,13 @@ const appSetting = async function (app) {
     app.use(bodyParser.urlencoded({extended: false}));
 };
 
-async function waitQueue(key, collectSite, res) {
-    priorities[key] = new Date();
-
-    while (true) {
-        if (Object.keys(urls).length < MAX_CONNECTIONS && key === getPrimaryPriorityKey()) {
-            break;
-        }
-
-        if (Object.keys(priorities).length > MAX_IDLE_CONNECTIONS) {
-            delete priorities[key];
-
-            let message = `CollectSite ${collectSite}, too many request, ${Object.keys(priorities).length}`;
-            res.send({
-                result: message,
-                item: null
-            });
-
-            logger.info(message);
-            return false;
-        }
-
-        await sleep(1000);
-        logger.info(`queue is full, length: ${Object.keys(urls).length}, ${Object.keys(priorities).length}`);
-    }
-    delete priorities[key];
-    urls[key] = key;
-    logger.info(`${key}, ${Object.keys(urls).length}, ${Object.keys(priorities).length}`);
-
-    return true;
-}
-
 
 function getClassType(item) {
     if (item instanceof Array && item.length > 0) {
-        return "ColtBaseUrlItemList";
+        return "ColtBaseUrlItem";
     }
 
     return null;
-}
-
-function sendErrorResponse(res, e: Error) {
-    res.send({
-        type: 'error',
-        message: e.message
-    });
 }
 
 /**
@@ -107,7 +55,7 @@ function sendErrorResponse(res, e: Error) {
             const collectSite = req.body.collectSite;
             const category = req.body.category
             key = `${collectSite}==${category}`;
-            if (!await waitQueue(key, collectSite, res)) {
+            if (!await ApiUtil.waitQueue(urls, key, collectSite, res)) {
                 return;
             }
 
@@ -120,7 +68,7 @@ function sendErrorResponse(res, e: Error) {
 
             } catch (e) {
                 logger.error("listTask error", e);
-                sendErrorResponse(res, e);
+                ApiUtil.sendErrorResponse(res, e);
                 delete urls[key];
                 return
             }
@@ -136,7 +84,7 @@ function sendErrorResponse(res, e: Error) {
             return
         } catch (e) {
             logger.error('post error', e);
-            sendErrorResponse(res, e);
+            ApiUtil.sendErrorResponse(res, e);
             if (key !== '') {
                 delete urls[key]
             }

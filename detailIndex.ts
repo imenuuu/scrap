@@ -1,75 +1,20 @@
 import {DetailTask} from "./src/task/DetailTask";
 import {ColtItem} from "./src/dto/ColtItem";
 import {logger} from "./src/config/logger/Logger";
+import * as ApiUtil from "./src/util/ApiUtil";
 
 const express = require('express');
 const app = express();
 const port = 8005;
-const bodyParser = require('body-parser');
 
 const chromeConfig = require('./src/config/chrome/ChromeConfig').options;
 const service = require('./src/config/service.json');
 const validator = require('./src/util/ValidatorUtil');
+const bodyParser = require('body-parser');
 
 const API_PATH = '/acq/node/detail';
-const MAX_CONNECTIONS = 1;
-const MAX_IDLE_CONNECTIONS = 10;
 const urls = {};
-const priorities = {};
-
 let cnt = 0;
-
-function sleep(ms) {
-    return new Promise((resolve) => {
-        setTimeout(resolve, ms);
-    });
-}
-
-function getPrimaryPriorityKey() {
-    return Object.keys(priorities).sort((k1, k2) => {
-        return priorities[k1] - priorities[k2];
-    })[0];
-}
-
-const appSetting = async function (app) {
-    app.listen(port, () => {
-        logger.info(`app listening at http://localhost:${port}`);
-    });
-
-    app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({extended: false}));
-};
-
-async function waitQueue(key, collectSite, res) {
-    priorities[key] = new Date();
-
-    while (true) {
-        if (Object.keys(urls).length < MAX_CONNECTIONS && key === getPrimaryPriorityKey()) {
-            break;
-        }
-
-        if (Object.keys(priorities).length > MAX_IDLE_CONNECTIONS) {
-            delete priorities[key];
-
-            let message = `CollectSite ${collectSite}, too many request, ${Object.keys(priorities).length}`;
-            res.send({
-                result: message,
-                item: null
-            });
-
-            logger.info(message);
-            return false;
-        }
-
-        await sleep(1000);
-        logger.info(`queue is full, length: ${Object.keys(urls).length}, ${Object.keys(priorities).length}`);
-    }
-    delete priorities[key];
-    urls[key] = key;
-    logger.info(`${key}, ${Object.keys(urls).length}, ${Object.keys(priorities).length}`);
-
-    return true;
-}
 
 
 function getClassType(item) {
@@ -80,13 +25,15 @@ function getClassType(item) {
     return null;
 }
 
-function sendErrorResponse(res, e: Error) {
-    res.send({
-        type: 'error',
-        message: e.message
-    });
-}
 
+const appSetting = async function (app) {
+    app.listen(port, () => {
+        logger.info(`app listening at http://localhost:${port}`);
+    });
+
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({extended: false}));
+};
 /**
  * let collectSite = 'top.naverstore.com'
  * let url = 'https://smartstore.naver.com/americanapparel/products/2536670070'
@@ -109,7 +56,7 @@ function sendErrorResponse(res, e: Error) {
             const collectSite = req.body.collectSite;
             const url = req.body.url;
             key = `${collectSite}==${url}`;
-            if (!await waitQueue(key, collectSite, res)) {
+            if (!await ApiUtil.waitQueue(urls, key, collectSite, res)) {
                 return;
             }
 
@@ -121,7 +68,7 @@ function sendErrorResponse(res, e: Error) {
                 cnt = cnt > 300 ? 0 : cnt;
             } catch (e) {
                 logger.error(e.stack);
-                sendErrorResponse(res, e);
+                ApiUtil.sendErrorResponse(res, e);
                 delete urls[key];
                 return
             }
@@ -136,7 +83,7 @@ function sendErrorResponse(res, e: Error) {
             return
         } catch (e) {
             logger.error(e.stack);
-            sendErrorResponse(res, e);
+            ApiUtil.sendErrorResponse(res, e);
             if (key !== '') {
                 delete urls[key]
             }
