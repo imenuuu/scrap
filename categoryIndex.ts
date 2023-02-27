@@ -27,7 +27,7 @@ const appSetting = async function (app) {
 };
 
 function getClassType(item) {
-    if (item instanceof Array && item.length > 0) {
+    if (item instanceof Array<Category> && item.length > 0) {
         return "Category";
     }
 

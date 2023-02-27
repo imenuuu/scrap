@@ -1,6 +1,7 @@
 import {ListTask} from "./src/task/ListTask";
 import {logger} from "./src/config/logger/Logger";
 import * as ApiUtil from "./src/util/ApiUtil";
+import type {ColtBaseUrlItem} from "./src/dto/ColtBaseUrlItem";
 
 const express = require('express');
 const app = express();
@@ -26,7 +27,7 @@ const appSetting = async function (app) {
 
 
 function getClassType(item) {
-    if (item instanceof Array && item.length > 0) {
+    if (item instanceof Array<ColtBaseUrlItem> && item.length > 0) {
         return "ColtBaseUrlItem";
     }
 
