@@ -54,7 +54,7 @@ function getClassType(item) {
         try {
             const collectSite = req.body.collectSite;
             const category = req.body.category
-            key = `${collectSite}==${category}`;
+            key = `${collectSite}==${JSON.stringify(category)}`;
             if (!await ApiUtil.waitQueue(urls, key, collectSite, res)) {
                 return;
             }
