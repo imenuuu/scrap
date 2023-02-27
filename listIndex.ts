@@ -62,7 +62,7 @@ function getClassType(item) {
 
             let coltBsUrlItemList = null;
             try {
-
+                category.categoryNameList = category.categoryNameList.join(" > ")
                 let classPath = validator.validateClassPath(service.list, collectSite);
                 const task = new ListTask(collectSite, classPath, chromeConfig)
                 coltBsUrlItemList = await task.execute(category);
