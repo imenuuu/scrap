@@ -38,7 +38,6 @@ class DnsCategory implements AcqCategory {
                 let cateName = parentDiv.find('> a').text()
                 const leaf = Leaf.make(cateName, cateUrl, false, false)//  4번째 매개변수는 parentLeaf
                 leaf.parentLeaf = this.leafTraverse.rootLeaf
-                leaf.depth = this.leafTraverse.rootLeaf.depth + 1;
                 this.leafTraverse.rootLeaf.addChildLeaf(leaf,this.leafTraverse)
             })
             await puppeteer.close(browser, page, this._glbConfig)
