@@ -279,7 +279,7 @@ async function parsingItemList(categoryList, detailPage, pageNum, coltBaseUrlLis
         makeItem.makeColtShelfItem(bsItem, url, COLLECT_SITE, SITE_NAME, goodsName, orgPrice, disPrice, totalEvalutCnt,
             avgPoint, thumbnail, '')
 
-        bsItem.coltBaseUrlCateList = bsCate
+        bsItem.coltBaseUrlCateList.push(bsCate)
         bsItem.coltBaseUrlRank = bsRank;
         coltBaseUrlList.push(bsItem); //
 
