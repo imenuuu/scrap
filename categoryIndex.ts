@@ -1,6 +1,7 @@
 import {CategoryTask} from "./src/task/CategoryTask";
 import {logger} from "./src/config/logger/Logger";
 import {Category} from "./src/data/Category";
+import * as ApiUtil from "./src/util/ApiUtil";
 
 const express = require('express');
 const app = express();
@@ -13,22 +14,8 @@ const validator = require('./src/util/ValidatorUtil');
 
 
 const API_PATH = '/acq/node/category';
-const MAX_CONNECTIONS = 1;
-const MAX_IDLE_CONNECTIONS = 10;
 const urls = {};
-const priorities = {};
 
-function sleep(ms) {
-    return new Promise((resolve) => {
-        setTimeout(resolve, ms);
-    });
-}
-
-function getPrimaryPriorityKey() {
-    return Object.keys(priorities).sort((k1, k2) => {
-        return priorities[k1] - priorities[k2];
-    })[0];
-}
 
 const appSetting = async function (app) {
     app.listen(port, () => {
@@ -39,52 +26,13 @@ const appSetting = async function (app) {
     app.use(bodyParser.urlencoded({extended: false}));
 };
 
-async function waitQueue(key, collectSite, res) {
-    priorities[key] = new Date();
-
-    while (true) {
-        if (Object.keys(urls).length < MAX_CONNECTIONS && key === getPrimaryPriorityKey()) {
-            break;
-        }
-
-        if (Object.keys(priorities).length > MAX_IDLE_CONNECTIONS) {
-            delete priorities[key];
-
-            let message = `CollectSite ${collectSite}, too many request, ${Object.keys(priorities).length}`;
-            res.send({
-                result: message,
-                item: null
-            });
-
-            logger.info(message);
-            return false;
-        }
-
-        await sleep(1000);
-        logger.info(`queue is full, length: ${Object.keys(urls).length}, ${Object.keys(priorities).length}`);
-    }
-    delete priorities[key];
-    urls[key] = key;
-    logger.info(`${key}, ${Object.keys(urls).length}, ${Object.keys(priorities).length}`);
-
-    return true;
-}
-
 function getClassType(item) {
     if (item instanceof Array && item.length > 0) {
-        return "CategoryData";
+        return "Category";
     }
 
     return null;
 }
-
-function sendErrorResponse(res, e: Error) {
-    res.send({
-        type: 'error',
-        message: e.message
-    });
-}
-
 
 (async () => {
     await appSetting(app);
@@ -96,21 +44,21 @@ function sendErrorResponse(res, e: Error) {
             const url = req.body.url;
             const category = req.body.category
             key = `${collectSite}==${url}`;
-            if (!await waitQueue(key, collectSite, res)) {
+            if (!await ApiUtil.waitQueue(urls, key, collectSite, res)) {
                 return;
             }
 
             let cateList = null;
-            let fliterList:Array<string> = null;
+            let fliterList: Array<string> = null;
             try {
 
                 let classPath = validator.validateClassPath(service.category, collectSite);
                 const task = new CategoryTask(collectSite, classPath, chromeConfig)
-                cateList = await task.execute(url , '');
+                cateList = await task.execute(url, '');
 
             } catch (e) {
                 logger.error("categoryTask error", e);
-                sendErrorResponse(res, e);
+                ApiUtil.sendErrorResponse(res, e);
                 delete urls[key];
                 return
             }
@@ -126,7 +74,7 @@ function sendErrorResponse(res, e: Error) {
             return
         } catch (e) {
             logger.error('post error', e);
-            sendErrorResponse(res, e);
+            ApiUtil.sendErrorResponse(res, e);
             if (key !== '') {
                 delete urls[key]
             }
