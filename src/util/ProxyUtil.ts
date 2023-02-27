@@ -10,7 +10,7 @@ export async function pushProxy(global) {
     if (global.proxyConfig['proxyName'] === 'oxyLab' || service.OXYLAB) {
         if (ipList === undefined)
             ipList = await getOxyLabIpList()
-        ip = ipList[Math.random() % ipList.length]
+        ip = ipList[Math.floor(Math.random() * ipList.length - 1)]
     }
 
     if (!global.args[global.args.length - 1].includes('--proxy-server='))
@@ -52,8 +52,9 @@ function oxyLabIpList() {
 }
 
 export async function popProxy(global) {
-    if (global.args[global.args.length - 1].includes('--proxy-server='))
+    if (global.args[global.args.length - 1].includes('--proxy-server=')) {
         global.args.pop()
+    }
 }
 
 

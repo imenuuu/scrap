@@ -2,7 +2,7 @@ import {ColtItem} from "../../../dto/ColtItem";
 import {ColtImage} from "../../../dto/ColtImage";
 import {ColtItemDiscount} from "../../../dto/ColtItemDiscount";
 import {ColtItemIvt} from "../../../dto/ColtItemIvt";
-import type {Detail} from "../Detail";
+import type {AcqDetail} from "../AcqDetail";
 import {logger} from "../../../config/logger/Logger";
 
 
@@ -17,7 +17,7 @@ const validator = require('../../../util/ValidatorUtil')
 
 let global
 
-class DnsDetail implements Detail {
+class DnsDetail implements AcqDetail {
     _glbConfig: { [key: string]: any; };
     collectSite: string;
     cnt: number;
@@ -123,7 +123,7 @@ class DnsDetail implements Detail {
             } catch (error) {
                 logger.error(error.stack);
             } finally {
-                puppeteer.close(browser, page, global)
+                await puppeteer.close(browser, page, global)
             }
         } catch (e) {
             logger.error(e.stack);

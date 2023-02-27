@@ -1,4 +1,4 @@
-import type {Detail} from "../site/detail/Detail";
+import type {AcqDetail} from "../site/detail/AcqDetail";
 import type {ColtItem} from "../dto/ColtItem";
 
 export class DetailTask {
@@ -26,7 +26,7 @@ export class DetailTask {
     async execute(url, cnt): Promise<ColtItem> {
         const detailClassModule = require(this._classPath);
         const detailClass = Object.values(detailClassModule)[0] as
-            new (config: { [key: string]: any; }, collectSite: string, cnt: number) => Detail;
+            new (config: { [key: string]: any; }, collectSite: string, cnt: number) => AcqDetail;
         const detail = new detailClass(this._config, this._collectSite, cnt);
         const item = await detail.extractItemDetail(url);
         return item;
