@@ -7,9 +7,10 @@ import type {ColtItemDiscount} from "../dto/ColtItemDiscount";
 import {ColtImage} from "../dto/ColtImage";
 import {ColtItemIvt} from "../dto/ColtItemIvt";
 
-import dateUtils from "./Dateutil";
-import hash from "./HashUtil";
-import logger from "../config/logger/Logger";
+import * as dateUtil from "./DateUtil";
+import * as hash from "./HashUtil";
+
+import {logger} from "../config/logger/Logger";
 
 
 export async function makeColtItem(cItem: ColtItem, url, collectSite, siteName, priceStdCd, goodsName, itemNum, category,
@@ -83,19 +84,19 @@ export async function makeColtBaseUrlItem(bsItem: ColtBaseUrlItem, url, collectS
     bsItem.type = 'M';
     bsItem.newYn = 0;
     bsItem.collectSite = collectSite;
-    bsItem.uptDt = dateUtils.currentDate();
-    bsItem.collectDate = dateUtils.currentDay();
+    bsItem.uptDt = dateUtil.currentDate();
+    bsItem.collectDate = dateUtil.currentDay();
 }
 
 export async function makeColtBaseCateItem(bsCate: ColtBaseUrlCate, categoryList) {
     bsCate.cate = categoryList.name;
     bsCate.cateUrl = categoryList.cateUrl;
-    bsCate.regDt = dateUtils.currentDate();
+    bsCate.regDt = dateUtil.currentDate();
 }
 
 export async function makeColtBaseRankItem(bsRank: ColtBaseUrlRank, rank) {
     bsRank.rank = rank;
-    bsRank.regDt = dateUtils.currentDate();
+    bsRank.regDt = dateUtil.currentDate();
 }
 
 export async function makeColtShelfItem(bsItem: ColtBaseUrlItem, url, collectSite, siteName, goodsName, orgPrice, disPrice,
@@ -111,6 +112,6 @@ export async function makeColtShelfItem(bsItem: ColtBaseUrlItem, url, collectSit
     bsItem.coltShelfItem.seller = '';
     bsItem.coltShelfItem.thumbnail = thumbnail;
     bsItem.coltShelfItem.addInfo = addInfo;
-    bsItem.coltShelfItem.regDt = dateUtils.currentDate();
-    bsItem.coltShelfItem.uptDt = dateUtils.currentDate();
+    bsItem.coltShelfItem.regDt = dateUtil.currentDate();
+    bsItem.coltShelfItem.uptDt = dateUtil.currentDate();
 }

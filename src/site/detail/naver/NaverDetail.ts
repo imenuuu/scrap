@@ -1,9 +1,9 @@
 import type {Detail} from "../Detail";
 import {ColtItem} from "../../../dto/ColtItem";
+import {logger} from "../../../config/logger/Logger";
 
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
-const logger = require('../../../config/logger/Logger');
 const service = require('../../../config/service.json');
 
 const http = require('http');

@@ -1,4 +1,4 @@
-const {currentDate} = require("../util/Dateutil");
+const {currentDate} = require("../util/DateUtil");
 
 class ColtItemEvalutInfo {
     refReviewId: number = 0;

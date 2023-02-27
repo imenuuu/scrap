@@ -3,13 +3,13 @@ import {ColtBaseUrlCate} from "../../../dto/ColtBaseUrlCate";
 import {ColtBaseUrlRank} from "../../../dto/ColtBaseUrlRank";
 import {ColtShelfItem} from "../../../dto/ColtShelfItem";
 import type {List} from "../List";
+import {logger} from "../../../config/logger/Logger";
 
-const logger = require('../../../config/logger/Logger');
 const service = require('../../../config/service.json');
 const makeItem = require('../../../util/ItemUtil')
 const puppeteer = require('../../../util/PuppeteerUtil');
 const cheerio = require('cheerio');
-let dateUtils = require('../../../util/Dateutil');
+let dateUtils = require('../../../util/DateUtil');
 
 let stdt;
 

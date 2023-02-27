@@ -2,8 +2,6 @@ import type {Leaf} from "./Leaf";
 import type {TargetLeaf} from "./TargetLeaf";
 import {CategoryData} from "./CategoryData";
 
-const Logger = require("../config/logger/Logger");
-
 class LeafTraverse{
 
     constructor() {
@@ -166,7 +164,7 @@ class LeafTraverse{
 			{
                 let cateListCopy:Array<CategoryData> = [];
                 for(let cate of cateList){
-                    if(cate.getCategoryString.replaceAll(" ", "").includes(this.tLeaf.filter))
+                    if(cate.getCategoryString().replaceAll(" ", "").includes(this.tLeaf.filter))
                         cateListCopy.push(cate)
                 }
 				cateList = cateListCopy;

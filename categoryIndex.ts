@@ -1,6 +1,6 @@
 import {CategoryTask} from "./src/task/CategoryTask";
+import {logger} from "./src/config/logger/Logger";
 
-const logger = require('./src/config/logger/Logger');
 const express = require('express');
 const app = express();
 const port = 8005;

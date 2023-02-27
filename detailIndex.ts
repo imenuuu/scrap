@@ -1,7 +1,7 @@
 import {DetailTask} from "./src/task/DetailTask";
 import {ColtItem} from "./src/dto/ColtItem";
+import {logger} from "./src/config/logger/Logger";
 
-const logger = require('./src/config/logger/Logger');
 const express = require('express');
 const app = express();
 const port = 8005;

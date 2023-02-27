@@ -51,4 +51,4 @@ const logger: Logger = createLogger({
 });
 
 
-export = logger
+export {logger}

@@ -1,7 +1,7 @@
 const moment = require('moment');
 
 // return yyyy-mm-dd hh:mm:ss
-exports.currentDate = function() {
+function currentDate() {
     const today = moment().format('YYYY-MM-DD HH:mm:ss');
     // let today = new Date().toISOString();
     // today = today.replace(/T/, ' ');
@@ -10,18 +10,20 @@ exports.currentDate = function() {
 }
 
 // return yyyy-mm-dd
-exports.currentDay = function(){
+function currentDay() {
     const today = moment().format('YYYY-MM-DD');
     return today;
 }
 
 // return yyyymmdd
-exports.collectDay = function(){
+function collectDay() {
     const today = moment().format('YYYYMMDD');
     return today;
 }
 
-exports.expiredDt = function () {
+function expiredDt() {
     const expired_dt = moment().add(7, 'd').format('YYYY-MM-DD HH:mm:ss');
     return expired_dt;
 }
+
+export {currentDate, currentDay, collectDay, expiredDt}

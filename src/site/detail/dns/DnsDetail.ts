@@ -3,12 +3,12 @@ import {ColtImage} from "../../../dto/ColtImage";
 import {ColtItemDiscount} from "../../../dto/ColtItemDiscount";
 import {ColtItemIvt} from "../../../dto/ColtItemIvt";
 import type {Detail} from "../Detail";
+import {logger} from "../../../config/logger/Logger";
 
 
 const cheerio = require('cheerio');
 const hash = require('../../../util/HashUtil');
 const {jsonToStr, strToJson} = require('../../../util/Jsonutil');
-const logger = require('../../../config/logger/Logger');
 const service = require('../../../config/service.json');
 const wait = require('../../../util/WaitUtil')
 const makeItem = require('../../../util/ItemUtil')

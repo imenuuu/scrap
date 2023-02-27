@@ -1,5 +1,5 @@
-const logger = require('../config/logger/Logger');
 const {jsonToStr, strToJson} = require('../util/Jsonutil');
+const {logger} = require("../config/logger/Logger");
 
 exports.validateClassPath = function (service, collectSite) {
     let classPath = '';
