@@ -1,4 +1,4 @@
-import type {List} from "../site/list/List";
+import type {AcqList} from "../site/list/AcqList";
 import type {ColtBaseUrlItem} from "../dto/ColtBaseUrlItem";
 
 export class ListTask {
@@ -16,7 +16,7 @@ export class ListTask {
 
         const listClassModule = require(this._classPath);
         const listClass = Object.values(listClassModule)[0] as
-            new (config: { [key: string]: any; }, collectSite: string, cnt: number) => List;
+            new (config: { [key: string]: any; }, collectSite: string, cnt: number) => AcqList;
         const list = new listClass(this._config, this._collectSite, 0);
         const item = await list.getItemUrls(category);
         return item;

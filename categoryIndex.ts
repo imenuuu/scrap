@@ -1,9 +1,10 @@
 import {CategoryTask} from "./src/task/CategoryTask";
 import {logger} from "./src/config/logger/Logger";
+import {Category} from "./src/data/Category";
 
 const express = require('express');
 const app = express();
-const port = 8005;
+const port = 8007;
 const bodyParser = require('body-parser');
 
 const chromeConfig = require('./src/config/chrome/ChromeConfig').options;
@@ -11,7 +12,7 @@ const service = require('./src/config/service.json');
 const validator = require('./src/util/ValidatorUtil');
 
 
-const API_PATH = '/acq/node/list';
+const API_PATH = '/acq/node/category';
 const MAX_CONNECTIONS = 1;
 const MAX_IDLE_CONNECTIONS = 10;
 const urls = {};
@@ -71,7 +72,7 @@ async function waitQueue(key, collectSite, res) {
 
 function getClassType(item) {
     if (item instanceof Array && item.length > 0) {
-        return "ColtBaseUrlItemList";
+        return "CategoryData";
     }
 
     return null;
@@ -103,12 +104,12 @@ function sendErrorResponse(res, e: Error) {
             let fliterList:Array<string> = null;
             try {
 
-                let classPath = validator.validateClassPath(service.list, collectSite);
+                let classPath = validator.validateClassPath(service.category, collectSite);
                 const task = new CategoryTask(collectSite, classPath, chromeConfig)
-                cateList = await task.execute(fliterList);
+                cateList = await task.execute(url , '');
 
             } catch (e) {
-                logger.error("listTask error", e);
+                logger.error("categoryTask error", e);
                 sendErrorResponse(res, e);
                 delete urls[key];
                 return
@@ -116,10 +117,10 @@ function sendErrorResponse(res, e: Error) {
 
             // logger.info(`bsUrlItemList: ${coltBsUrlItemList}`);
 
-            // res.send({
-            //     type: getClassType(coltBsUrlItemList),
-            //     item: JSON.parse(JSON.stringify(coltBsUrlItemList))
-            // });
+            res.send({
+                type: getClassType(Category),
+                item: JSON.parse(JSON.stringify(cateList))
+            });
 
             delete urls[key];
             return

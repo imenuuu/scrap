@@ -5,21 +5,21 @@ class Leaf{
     constructor() {
     }
 
-    name: string;
-    url: string;
-    depth: number = 1;
+    name: string = '';
+    url: string = '';
+    depth: number = 0;
     bestItem :boolean = false;
     specialExhibition: boolean = false;
     parentLeaf :Leaf;
-    parentLeafName :Array<string>;
-    childrenLeaf :Array<Leaf>;
+    parentLeafNameList :Array<string> = [];
+    childLeafList :Array<Leaf> = [];
 
     //  Leaf make(String name,String url) 
 	// {
 	// 	return make(name,url,false,false);
 	// }
 	
-	make(name:string, url:string, bestItem:boolean, specialExhibition:boolean) :Leaf
+	static make(name:string, url:string, bestItem:boolean, specialExhibition:boolean) :Leaf
 	{
         if(bestItem == null && specialExhibition == null) {
             bestItem = false;
@@ -39,7 +39,7 @@ class Leaf{
 
     getLeafNames() :Array<string>
 	{
-        let ppList:Array<string> = this.parentLeafName.slice();
+        let ppList:Array<string> = this.parentLeafNameList.slice();
 		ppList.push(this.name);
 		
 		return ppList;
@@ -47,12 +47,12 @@ class Leaf{
 
     addParentLeafName(parentName :string)
 	{	
-		this.parentLeafName.push(parentName);
+		this.parentLeafNameList.push(parentName);
 	}
 
     isLastLeaf():boolean
 	{
-		if(this.childrenLeaf ==null || this.childrenLeaf.length == 0)
+		if(this.childLeafList ==null || this.childLeafList.length == 0)
 		{
 			return true;
 		}
@@ -63,9 +63,9 @@ class Leaf{
     getLeaf(leafName:string, direct:boolean):Leaf
 	{
         let m:Leaf;
-		if(this.childrenLeaf != null)
+		if(this.childLeafList != null)
 		{
-            let children:Array<Leaf> = this.childrenLeaf;
+            let children:Array<Leaf> = this.childLeafList;
 			
 			if(children !=null && children.length != 0)
 			{
@@ -92,7 +92,7 @@ class Leaf{
 
     getChildLeaf(sourceLeaf:Leaf, leaf:string):Leaf
 	{
-		let children:Array<Leaf>  = sourceLeaf.childrenLeaf;
+		let children:Array<Leaf>  = sourceLeaf.childLeafList;
 		let m:Leaf;
 		if(children !=null && children.length != 0)
 		{
@@ -131,9 +131,9 @@ class Leaf{
 				f.depth = this.depth + 1;
 			}
 			
-			if(this.parentLeafName != null && this.parentLeafName.length != 0)
+			if(this.parentLeafNameList != null && this.parentLeafNameList.length != 0)
 			{
-				for(let s of this.parentLeafName)
+				for(let s of this.parentLeafNameList)
 				{
 					f.addParentLeafName(s);
 				}
@@ -141,7 +141,7 @@ class Leaf{
 			}
 			
 			f.addParentLeafName(this.name);
-			this.childrenLeaf.push(f);
+			this.childLeafList.push(f);
 			f.parentLeaf = this;
 			
 			if(lft != null)

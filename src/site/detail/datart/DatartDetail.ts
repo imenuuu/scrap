@@ -1,63 +1,41 @@
 import {ColtItem} from "../../../dto/ColtItem";
-import type {Detail} from "../Detail";
-import * as url from "url";
+import type {AcqDetail} from "../AcqDetail";
 import {ColtImage} from "../../../dto/ColtImage";
 import {ColtItemDiscount} from "../../../dto/ColtItemDiscount";
 import {ColtItemIvt} from "../../../dto/ColtItemIvt";
 import {logger} from "../../../config/logger/Logger";
 
-const puppeteer = require('puppeteer');
+const wait = require('../../../util/WaitUtil')
+const makeItem = require('../../../util/ItemUtil')
+const puppeteer = require('../../../util/PuppeteerUtil')
+const validator = require('../../../util/ValidatorUtil')
 const cheerio = require('cheerio');
 const hash = require('../../../util/HashUtil');
 const {jsonToStr, strToJson} = require('../../../util/Jsonutil');
 const service = require('../../../config/service.json');
-let ipCnt;
-let ipList;
-let global;
 
-class DatartDetail implements Detail {
+class DatartDetail implements AcqDetail {
     _glbConfig: { [key: string]: any; };
     collectSite: string;
-    luminati_zone: string;
-    OXYLABS: boolean;
-    LUMINATI: boolean;
+
     cnt: number;
 
     constructor(config, collectSite, cnt) {
         this._glbConfig = config;
         this._glbConfig.userDataDir = service.DETAIL_PUPPET_PROFILE;
-        global = this._glbConfig;
         this.collectSite = collectSite;
-        this.OXYLABS = service.OXYLABS;
-        this.LUMINATI = service.LUMINATI;
-        this.luminati_zone = 'lum-customer-epopcon-zone-zone_ru';
         this.cnt = cnt;
     }
 
     async extractItemDetail(url): Promise<ColtItem> {
         try {
-            if (this.OXYLABS) {
-                let ipList = await this.getIpList();
-                let mod = (this.cnt % ipList.length);
-                let ip = ipList[mod];
-                global.args.push('--proxy-server=' + ip);
-            }
-            if (this.LUMINATI) {
-                global.args.push('--proxy-server=zproxy.lum-superproxy.io:22225');
-            }
-
-            const browser = await puppeteer.launch(global);
-            let context = await browser.createIncognitoBrowserContext();
-            const page = await context.newPage();
-            await this.pageSet(page);
-
-
+            const [browser, context, page] = await puppeteer.getPage(this._glbConfig)
             try {
                 for (let i = 0; i < 5; i++) {
                     let parseChecker = true;
                     try {
                         await page.goto(url, {waitUntil: "networkidle0"}, {timeout: 20000});
-                        await sleep(3);
+                        await validator.sleep(3);
                         parseChecker = await pageControl(page);
                         parseChecker = await parseCheck(page, "div.code-widget");
                     } catch (error) {
@@ -88,7 +66,7 @@ class DatartDetail implements Detail {
                 const detailPage = cheerio.load(await page.content());
 
                 let category = await this.getCategory(page);
-                if (!await isNotUndefinedOrEmpty(category)) {
+                if (!await validator.isNotUndefinedOrEmpty(category)) {
                     category = 'NO_CATEGORY';
                 }
 
@@ -139,11 +117,11 @@ class DatartDetail implements Detail {
                     totalEvalutCnt = 0;
                 }
                 let addInfo = await this.getAddInfo(page, itemKod);
-                await this.makeColtItem(cItem, url, this.collectSite, goodsName, itemNum, category, '', avgPoint, totalEvalutCnt, addInfo, price);
+                await makeItem.makeColtItem(cItem, url, this.collectSite,'Datart','018' ,goodsName, itemNum, category, '', avgPoint, totalEvalutCnt, addInfo, price);
                 await this.getOptionStock(page, cItem, itemNum, sitePrice);
                 await this.getImage(page, cItem, videoList);
 
-                if (await isNotUndefinedOrEmpty(itemNum) && itemNum != undefined && itemNum != null)
+                if (await validator.isNotUndefinedOrEmpty(itemNum) && itemNum != undefined && itemNum != null)
                     return cItem;
                 else
                     return null;
@@ -151,36 +129,11 @@ class DatartDetail implements Detail {
             } catch (error) {
                 logger.error(error.stack);
             } finally {
-                if (this.OXYLABS) global.args.pop();
-                page.close();
-                browser.close();
+                await puppeteer.close(browser, page, this._glbConfig)
             }
         } catch (e) {
             logger.error(e.stack);
         }
-    }
-
-    async getIpList() {
-        let browserOxylab = await puppeteer.launch(global);
-        let pageOxylab = await browserOxylab.newPage();
-        await pageOxylab.authenticate({
-            username: 'epopcon',
-            password: 'FChB5uEd45',
-            key: '4b33bfee-80a6-11eb-927e-901b0ec4424b'
-        });
-        let response = await pageOxylab.goto(service.OXYLABS_URL);
-        let jsonArr = JSON.parse(await response.text());
-
-        pageOxylab.close();
-        browserOxylab.close();
-
-        let ipList = [];
-        for (let json of jsonArr) {
-            let ip = json.ip;
-            let port = json.port;
-            ipList.push(ip + ':' + port);
-        }
-        return ipList;
     }
 
     async getOptionStock(page, cItem: ColtItem, itemNum, sitePrice) {
@@ -202,22 +155,6 @@ class DatartDetail implements Detail {
         }
     }
 
-    async makeColtItem(cItem: ColtItem, url, collectSite, title, item_num, category, brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice) {
-        cItem.collectSite = collectSite;
-        cItem.collectUrl = url;
-        cItem.siteName = 'Datart';
-        cItem.priceStdCd = '018';
-
-        cItem.itemNum = item_num;
-        cItem.goodsName = title;
-        cItem.goodsCate = category;
-        cItem.brandName = brand_name;
-        cItem.price = orgPrice;
-        cItem.sitePrice = orgPrice;
-        cItem.totalEvalCnt = totalEvalutCnt;
-        cItem.fivePoint = avgPoint;
-        cItem.addInfo = addInfo;
-    }
 
     async getAddInfo(page, itemKod) {
         let infoObj = new Object();
@@ -281,55 +218,6 @@ class DatartDetail implements Detail {
             logger.error("imageError : " + error);
         }
     }
-
-    async pageSet(page) {
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, 'webdriver', {
-                get: () => false
-            });
-        });
-
-        if (this.OXYLABS) {
-            await page.authenticate({
-                username: 'epopcon',
-                password: 'FChB5uEd45',
-                key: '4b33bfee-80a6-11eb-927e-901b0ec4424b'
-            });
-
-        }
-
-        if (this.LUMINATI) {
-            await page.authenticate({
-                username: this.luminati_zone,
-                password: 'jhwfsy8ucuh2'
-            });
-        }
-
-        await page.setDefaultTimeout(50000000);
-
-        await page.setDefaultNavigationTimeout(30000);
-        await page.setDefaultTimeout(30000);
-        await page.setUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36");
-    }
-
-}
-
-async function isNotUndefinedOrEmpty(value) {
-    if (value == "" ||
-        value == null ||
-        value == undefined) {
-        return false;
-    } else {
-        return true;
-    }
-}
-
-
-async function sleep(sec) {
-    sec = sec * 1000;
-    return new Promise((resolve) => {
-        setTimeout(resolve, sec);
-    });
 }
 
 async function pageControl(page) {

@@ -2,7 +2,7 @@ import {ColtBaseUrlItem} from "../../../dto/ColtBaseUrlItem";
 import {ColtBaseUrlCate} from "../../../dto/ColtBaseUrlCate";
 import {ColtBaseUrlRank} from "../../../dto/ColtBaseUrlRank";
 import {ColtShelfItem} from "../../../dto/ColtShelfItem";
-import type {List} from "../List";
+import type {AcqList} from "../AcqList";
 import {logger} from "../../../config/logger/Logger";
 
 const service = require('../../../config/service.json');
@@ -10,13 +10,16 @@ const makeItem = require('../../../util/ItemUtil')
 const puppeteer = require('../../../util/PuppeteerUtil');
 const cheerio = require('cheerio');
 let dateUtils = require('../../../util/DateUtil');
+const wait = require('../../../util/WaitUtil')
+
+
 
 let stdt;
 
 const COLLECT_SITE = 'lg.dns-shop.ru'
 const SITE_NAME = 'DNS'
 
-class DnsKeywordList implements List {
+class DnsKeywordList implements AcqList {
 
     _glbConfig: { [key: string]: any; };
     collectSite: string;
@@ -56,8 +59,13 @@ class DnsKeywordList implements List {
          }
          return categoryList;
      }*/
+    /**
+     * "category" : {"name":"DNS > ТВ и мультимедиа > Телевизоры и аксессуары > Телевизоры", "url":"https://www.dns-shop.ru/catalog/17a8ae4916404e77/televizory/"}
+     *  요청 body
+     * @param category
+     */
 
-    async getItemUrls(categoryList) {
+    async getItemUrls(category) {
 
         stdt = await getTurn();
 
@@ -69,7 +77,7 @@ class DnsKeywordList implements List {
         let param = '?p=';
         let totalCnt;
         try {
-            let url = categoryList.cateUrl;
+            let url = category.categoryUrl;
             try {
                 await page.goto(url, {waitUntil: ["domcontentloaded"], timeout: 80000});
                 await page.waitForSelector('body > div.container.category-child > div > div.products-page__content > div.products-page__list > div.products-list > div > div > div > div.catalog-product__image > a > picture > img', {visible: true});
@@ -88,19 +96,19 @@ class DnsKeywordList implements List {
             detailPage = cheerio.load(await page.content());
 
             //검색어 진입시 redirect되므로 현재 url로 요청보내야함
-            if (categoryList.name.includes('LGEG')) {
+            if (category.categoryNameList.includes('LGEG')) {
                 currentUrl = await page.url();
                 if (currentUrl.includes('?')) param = '&p=';
                 totalCnt = detailPage('span.products-count')//.text().replaceAll(/\d+ категориях/gm, '').replaceAll(/\d+ категории/gm, '').replaceAll(/\D+/gm, '');
             } else {
                 totalCnt = detailPage('div.products-page__title').text().replaceAll(/\d+ категориях/gm, '').replaceAll(/\d+ категории/gm, '').replaceAll(/\D+/gm, '');
-                currentUrl = categoryList.cateUrl;
+                currentUrl = category.categoryUrl;
             }
 
             totalCnt = totalCnt > 2000 ? 2000 : totalCnt;
-            logger.info('#Category: ' + categoryList.name + ', List Total Count: ' + totalCnt);
+            logger.info('#Category: ' + category.categoryNameList + ', List Total Count: ' + totalCnt);
             if (totalCnt == 0) {
-                logger.info('#Empty Result!, cate -> ' + categoryList.name + ' , url -> ' + url)
+                logger.info('#Empty Result!, cate -> ' + category.categoryNameList + ' , url -> ' + url)
                 return coltBaseUrlList;
             }
 
@@ -130,12 +138,12 @@ class DnsKeywordList implements List {
                     }
 
                     let detailPageUpdate = cheerio.load(await page.content());
-                    parsingItemList(categoryList, detailPageUpdate, pageNum, coltBaseUrlList);
+                    parsingItemList(category, detailPageUpdate, pageNum, coltBaseUrlList);
 
                 } else {
-                    parsingItemList(categoryList, detailPage, pageNum, coltBaseUrlList);
+                    parsingItemList(category, detailPage, pageNum, coltBaseUrlList);
                 }
-                await sleep(2);
+                await wait.sleep(2);
                 logger.info("pageNum: " + pageNum + " , totalList:" + coltBaseUrlList.length);
             }
         } catch (error) {
@@ -148,13 +156,6 @@ class DnsKeywordList implements List {
         return coltBaseUrlList;
     }
 
-}
-
-async function sleep(sec) {
-    sec = sec * 1000
-    return new Promise((resolve) => {
-        setTimeout(resolve, sec);
-    })
 }
 
 async function getTurn() {
@@ -237,24 +238,6 @@ async function getSearchCate() {
     searchCate.set('LGEG > DNS > тв саундбар', 'тв саундбар'); // 2
     //searchCate.set('LGEG > DNS > Система объемного звука' , 'Система объемного звука'); // 0 결과없어서 주석처리
     return searchCate;
-}
-
-async function pageSet(page) {
-    await page.evaluateOnNewDocument(() => {
-        Object.defineProperty(navigator, 'webdriver', {
-            get: () => false
-        })
-    });
-
-    // 루미나티
-    await page.setDefaultTimeout(50000000);
-    await page.authenticate({
-        username: 'lum-customer-epopcon-zone-zone_ru',
-        password: 'jhwfsy8ucuh2'
-    })
-    await page.setDefaultNavigationTimeout(70000);
-    await page.setDefaultTimeout(70000);
-    await page.setUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36");
 }
 
 

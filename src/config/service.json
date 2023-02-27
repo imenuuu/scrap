@@ -28,5 +28,13 @@
             "COLLECT_SITE" : "lg.dns-shop.ru",
             "CLASS_PATH" : "../site/list/dns/DnsKeywordList"
         }
+    ],
+
+    "CATEGORY_PUPPET_PROFILE" : "../../puppet_profile/detail",
+    "category" : [
+        {
+            "COLLECT_SITE" : "lg.dns-shop.ru",
+            "CLASS_PATH" : "../site/category/dns/DnsCategory"
+        }
     ]
 }

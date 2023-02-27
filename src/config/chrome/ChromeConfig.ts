@@ -16,12 +16,12 @@ var args = [
     ,'--window-size=1920,1080'
 ]
 const proxyConfig = {
-    proxyName : 'luminati', //oxyLab, luminati 기본 셋팅은 oxyLab
-    /*username : 'epopcon',//
-    password : 'FChB5uEd45', oxyLab
-    */
-    username: 'lum-customer-epopcon-zone-zone_ru',
-    password: 'jhwfsy8ucuh2',
+    proxyName : 'oxyLab', //oxyLab, luminati 기본 셋팅은 oxyLab
+    username : 'epopcon',//
+    password : 'FChB5uEd45',// oxyLab
+
+    /*username: 'lum-customer-epopcon-zone-zone_ru',
+    password: 'jhwfsy8ucuh2',*/
     key  : '4b33bfee-80a6-11eb-927e-901b0ec4424b', //oxylab
     contextUse : true
 }

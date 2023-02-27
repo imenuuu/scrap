@@ -1,4 +1,4 @@
-import type {Detail} from "../Detail";
+import type {AcqDetail} from "../AcqDetail";
 import {ColtItem} from "../../../dto/ColtItem";
 import {logger} from "../../../config/logger/Logger";
 
@@ -8,7 +8,7 @@ const service = require('../../../config/service.json');
 
 const http = require('http');
 
-export class NaverDetail implements Detail {
+export class NaverDetail implements AcqDetail {
     _glbConfig: { [key: string]: any; };
     collectSite: string;
     luminati_zone: string;
