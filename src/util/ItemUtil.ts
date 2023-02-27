@@ -88,9 +88,9 @@ export async function makeColtBaseUrlItem(bsItem: ColtBaseUrlItem, url, collectS
     bsItem.collectDate = dateUtil.currentDay();
 }
 
-export async function makeColtBaseCateItem(bsCate: ColtBaseUrlCate, categoryList) {
-    bsCate.cate = categoryList.name;
-    bsCate.cateUrl = categoryList.cateUrl;
+export async function makeColtBaseCateItem(bsCate: ColtBaseUrlCate, category) {
+    bsCate.cate = category.categoryNameList;
+    bsCate.cateUrl = category.categoryUrl;
     bsCate.regDt = dateUtil.currentDate();
 }
 
