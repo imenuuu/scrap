@@ -5,7 +5,7 @@ import type {Category} from "./src/data/Category";
 
 const express = require('express');
 const app = express();
-const port = 8007;
+const port = 8001;
 const bodyParser = require('body-parser');
 
 const chromeConfig = require('./src/config/chrome/ChromeConfig').options;

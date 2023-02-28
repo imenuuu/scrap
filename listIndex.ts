@@ -5,7 +5,7 @@ import type {ColtBaseUrlItem} from "./src/dto/ColtBaseUrlItem";
 
 const express = require('express');
 const app = express();
-const port = 8005;
+const port = 8002;
 const bodyParser = require('body-parser');
 
 const chromeConfig = require('./src/config/chrome/ChromeConfig').options;

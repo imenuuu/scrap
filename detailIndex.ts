@@ -5,7 +5,7 @@ import * as ApiUtil from "./src/util/ApiUtil";
 
 const express = require('express');
 const app = express();
-const port = 8005;
+const port = 8003;
 
 const chromeConfig = require('./src/config/chrome/ChromeConfig').options;
 const service = require('./src/config/service.json');
