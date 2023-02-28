@@ -65,7 +65,7 @@ function getClassType(item) {
             // logger.info(`bsUrlItemList: ${coltBsUrlItemList}`);
 
             res.send({
-                type: getClassType(Category),
+                type: getClassType(cateList),
                 item: JSON.parse(JSON.stringify(cateList))
             });
 
