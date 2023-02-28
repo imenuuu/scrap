@@ -20,14 +20,14 @@ let global
 class DnsDetail implements AcqDetail {
     _glbConfig: { [key: string]: any; };
     collectSite: string;
-    cnt: number;
 
-    constructor(config, collectSite, cnt) {
+
+    constructor(config, collectSite) {
         this._glbConfig = config;
         this._glbConfig.userDataDir = service.DETAIL_PUPPET_PROFILE;
         global = this._glbConfig
         this.collectSite = collectSite;
-        this.cnt = cnt;
+
     }
 
     async extractItemDetail(url): Promise<ColtItem> {

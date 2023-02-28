@@ -23,11 +23,11 @@ export class DetailTask {
     //     return this.detailType[className];
     // }
 
-    async execute(url, cnt): Promise<ColtItem> {
+    async execute(url): Promise<ColtItem> {
         const detailClassModule = require(this._classPath);
         const detailClass = Object.values(detailClassModule)[0] as
-            new (config: { [key: string]: any; }, collectSite: string, cnt: number) => AcqDetail;
-        const detail = new detailClass(this._config, this._collectSite, cnt);
+            new (config: { [key: string]: any; }, collectSite: string) => AcqDetail;
+        const detail = new detailClass(this._config, this._collectSite);
         const item = await detail.extractItemDetail(url);
         return item;
     }

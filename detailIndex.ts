@@ -64,8 +64,7 @@ const appSetting = async function (app) {
             try {
                 let classPath = validator.validateClassPath(service.detail, collectSite);
                 const task = new DetailTask(collectSite, classPath, chromeConfig);
-                item = await task.execute(url, cnt);
-                cnt = cnt > 300 ? 0 : cnt;
+                item = await task.execute(url);
             } catch (e) {
                 logger.error(e.stack);
                 ApiUtil.sendErrorResponse(res, e);
