@@ -1,7 +1,7 @@
 import {CategoryTask} from "./src/task/CategoryTask";
 import {logger} from "./src/config/logger/Logger";
-import {Category} from "./src/data/Category";
 import * as ApiUtil from "./src/util/ApiUtil";
+import type {Category} from "./src/data/Category";
 
 const express = require('express');
 const app = express();
