@@ -4,5 +4,5 @@ export interface AcqCategory {
     _glbConfig: { [key: string]: any; };
     collectSite: string;
 
-    getCategory:(url :string ,filterList : string) => Promise<Array<Category>>;
+    getCategory:(filterList : object) => Promise<Array<Category>>;
 }

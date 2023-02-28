@@ -24,8 +24,9 @@ class DnsCategory implements AcqCategory {
         this.filter = filter
     }
 
-    async getCategory(url: string, filter: string): Promise<Array<Category>> {
+    async getCategory(filter: object): Promise<Array<Category>> {
         const [browser, context, page ] = await puppeteer.getPage(this._glbConfig)
+        const url = "https://www.dns-shop.ru"
         try {
             this.leafTraverse = new LeafTraverse().make('dns')    // siteName
             await page.goto(url, {waitUntil: "networkidle2"}, {timeout: 30000})

@@ -41,20 +41,19 @@ function getClassType(item) {
         let key = '';
         try {
             const collectSite = req.body.collectSite;
-            const url = req.body.url;
-            const category = req.body.category
-            key = `${collectSite}==${url}`;
+            const filterList= req.body.filterList
+            key = `${collectSite}==${collectSite}`;
             if (!await ApiUtil.waitQueue(urls, key, collectSite, res)) {
                 return;
             }
 
             let cateList = null;
-            let fliterList: Array<string> = null;
+            let fliterList: object = null;
             try {
 
                 let classPath = validator.validateClassPath(service.category, collectSite);
                 const task = new CategoryTask(collectSite, classPath, chromeConfig)
-                cateList = await task.execute(url, '');
+                cateList = await task.execute(collectSite, filterList);
 
             } catch (e) {
                 logger.error("categoryTask error", e);

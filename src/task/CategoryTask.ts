@@ -12,13 +12,13 @@ export class CategoryTask {
         this._config = chromeConfig;
     }
 
-    async execute(url : string, filterList : string) : Promise<Array<Category>> {
+    async execute(collectSite : string, filterList : object) : Promise<Array<Category>> {
 
         const cateClassModule = require(this._classPath);
         const cateClass = Object.values(cateClassModule)[0] as
-            new (config: { [key: string]: any; }, collectSite: string, cnt: number) => AcqCategory;
-        const category = new cateClass(this._config, this._collectSite, 0);
-        const item = await category.getCategory(url ,filterList);
+            new (config: { [key: string]: any; }, collectSite: string) => AcqCategory;
+        const category = new cateClass(this._config, this._collectSite);
+        const item = await category.getCategory(filterList);
         return item;
     }
 }
