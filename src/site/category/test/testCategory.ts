@@ -17,7 +17,7 @@ class DnsCategory implements AcqCategory {
     filter: Array<string>
     leafTraverse: LeafTraverse
 
-    constructor(config: { [key: string]: any; }, collectSite: string, filter: string[]) {
+    constructor(config, collectSite, filter) {
         this._glbConfig = config;
         this._glbConfig.userDataDir = service.DETAIL_PUPPET_PROFILE;
         this.collectSite = collectSite
@@ -26,20 +26,27 @@ class DnsCategory implements AcqCategory {
 
     async getCategory(filter: object): Promise<Array<Category>> {
         const [browser, context, page ] = await puppeteer.getPage(this._glbConfig)
-        const url : string = "https://www.dns-shop.ru"
+        const url: string = '';
         try {
-            this.leafTraverse = new LeafTraverse().make('dns')    // siteName
+            this.leafTraverse = new LeafTraverse().make('')    // siteName
+            // '' 안에 사이트 명을 작성
+
             await page.goto(url, {waitUntil: "networkidle2"}, {timeout: 30000})
 
             await wait.sleep(3)
-            const detailPage : any = await cheerio.load(await page.content());
-            detailPage('.catalog-menu-rootmenu.homepage > div').each((index, content) => {      //cateogry element
-                let parentDiv : any = detailPage(content)
-                let cateUrl : string = 'https://www.dns-shop.ru' + parentDiv.find(' > a').attr('href')
-                let cateName : string = parentDiv.find('> a').text()
-                const leaf : Leaf = Leaf.make(cateName, cateUrl, false, false)//  4번째 매개변수는 parentLeaf
-                leaf.parentLeaf = this.leafTraverse.rootLeaf
-                this.leafTraverse.rootLeaf.addChildLeaf(leaf,this.leafTraverse)
+            const detailPage = await cheerio.load(await page.content());
+            detailPage('').each((index, content) => {      //cateogry element
+                let parentDiv = detailPage(content)
+                let cateUrl : string = ''; // category Url 엘리먼트 받아오기
+                // ex > let cateUrl = detailPage('categoryUrlElement').text();
+
+                let cateName : string = ''; // category name 엘리먼트 받아오기
+                // ex > let cateName = detailPage('categoryNameElement').text();
+
+                const leaf = Leaf.make(cateName, cateUrl, false, false)//  4번째 매개변수는 parentLeaf
+                leaf.parentLeaf = this.leafTraverse.rootLeaf;
+                leaf.depth = this.leafTraverse.rootLeaf.depth + 1;
+                this.leafTraverse.rootLeaf.addChildLeaf(leaf,this.leafTraverse);
             })
             await puppeteer.close(browser, page, this._glbConfig)
 
@@ -54,19 +61,23 @@ class DnsCategory implements AcqCategory {
         return this.leafTraverse.toCategoryList();
     }
 
-    async second(){
+    async second() {
         for (const leaf of this.leafTraverse.rootLeaf.childLeafList) {           // category Leaf 순회
             const [browser, context, page] = await puppeteer.getPage(this._glbConfig)
 
             try {
                 await page.goto(leaf.url, {waitUntil: "networkidle2"}, {timeout: 30000})
                 await wait.sleep(3)
-                const detailPage : any = await cheerio.load(await page.content());
-                detailPage('.subcategory__item-container > a').each((index, content) => {
-                    let parentDiv : any = detailPage(content)
-                    const cateName : string = parentDiv.find('> label').text()
-                    const cateUrl : string = 'https://www.dns-shop.ru' + parentDiv.attr('href')
-                    const childLeaf : Leaf = Leaf.make(cateName, cateUrl, false, false)
+
+                const detailPage = await cheerio.load(await page.content());
+
+                detailPage('').each((index, content) => {
+                    let parentDiv = detailPage(content)
+                    const cateName : string = '';
+                    const cateUrl : string = '';
+                    
+                    const childLeaf = Leaf.make(cateName, cateUrl, false, false)
+
                     childLeaf.parentLeaf = leaf
                     leaf.addChildLeaf(childLeaf, this.leafTraverse)
                 })
@@ -79,6 +90,8 @@ class DnsCategory implements AcqCategory {
         }
         return;
     }
+
+    // 이후의 카테고리가 존재할 경우 본인이 third ~ 이후의 function을 만들어서 수집
 
 }
 export {DnsCategory}

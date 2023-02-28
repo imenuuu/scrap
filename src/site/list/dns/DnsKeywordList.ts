@@ -14,10 +14,10 @@ const wait = require('../../../util/WaitUtil')
 
 
 
-let stdt;
+let stdt : string;
 
-const COLLECT_SITE = 'lg.dns-shop.ru'
-const SITE_NAME = 'DNS'
+const COLLECT_SITE : string = 'lg.dns-shop.ru'
+const SITE_NAME : string = 'DNS'
 
 class DnsKeywordList implements AcqList {
 
@@ -25,7 +25,7 @@ class DnsKeywordList implements AcqList {
     collectSite: string;
 
 
-    constructor(config, collectSite) {
+    constructor(config: { [key: string]: any; }, collectSite: string) {
         this._glbConfig = config;
         this._glbConfig.userDataDir = service.LIST_PUPPET_PROFILE;
         this.collectSite = collectSite;
@@ -64,19 +64,19 @@ class DnsKeywordList implements AcqList {
      * @param category
      */
 
-    async getItemUrls(category) {
+    async getItemUrls(category : any) : Promise<Array<ColtBaseUrlItem>> {
 
         stdt = await getTurn();
 
         const [browser, context, page] = await puppeteer.getPage(this._glbConfig)
 
-        let coltBaseUrlList = new Array();
-        let detailPage
-        let currentUrl = '';
-        let param = '?p=';
-        let totalCnt;
+        let coltBaseUrlList : Array<ColtBaseUrlItem> = new Array();
+        let detailPage : any
+        let currentUrl : string = '';
+        let param : string = '?p=';
+        let totalCnt : number;
         try {
-            let url = category.categoryUrl;
+            let url : string = category.categoryUrl;
             try {
                 await page.goto(url, {waitUntil: ["domcontentloaded"], timeout: 80000});
                 await page.waitForSelector('body > div.container.category-child > div > div.products-page__content > div.products-page__list > div.products-list > div > div > div > div.catalog-product__image > a > picture > img', {visible: true});
@@ -111,9 +111,9 @@ class DnsKeywordList implements AcqList {
                 return coltBaseUrlList;
             }
 
-            let pageSize = 18;
-            let pageCnt = Math.floor((totalCnt / pageSize));
-            let mod = (totalCnt % pageSize);
+            let pageSize : number = 18;
+            let pageCnt : number = Math.floor((totalCnt / pageSize));
+            let mod : number = (totalCnt % pageSize);
             if (mod > 0) pageCnt = pageCnt + 1;
 
             for (let pageNum = 1; pageNum <= 1; pageNum++) {
@@ -136,7 +136,7 @@ class DnsKeywordList implements AcqList {
                         }
                     }
 
-                    let detailPageUpdate = cheerio.load(await page.content());
+                    let detailPageUpdate : any = cheerio.load(await page.content());
                     parsingItemList(category, detailPageUpdate, pageNum, coltBaseUrlList);
 
                 } else {
@@ -157,7 +157,7 @@ class DnsKeywordList implements AcqList {
 
 }
 
-async function getTurn() {
+async function getTurn() : Promise<string> {
     let date = new Date;
     let hour = date.getHours();
 
@@ -171,7 +171,7 @@ async function getTurn() {
     }
 }
 
-async function getTraverseCate() {
+async function getTraverseCate() : Promise<Map<string,string>> {
     const category = new Map();
     category.set('DNS > ТВ и мультимедиа > Телевизоры и аксессуары > Телевизоры', 'https://www.dns-shop.ru/catalog/17a8ae4916404e77/televizory/'); //548
     category.set('DNS > ТВ и мультимедиа > Телевизоры и аксессуары > Телевизоры > LG > 4K UHD', 'https://www.dns-shop.ru/catalog/17a8ae4916404e77/televizory/?brand=lg&f[p4]=3np'); //96
@@ -194,7 +194,7 @@ async function getTraverseCate() {
 }
 
 
-async function getSearchCate() {
+async function getSearchCate() : Promise<Map<string,string>> {
     const searchCate = new Map();
     searchCate.set('LGEG > DNS > холодильник', 'холодильник');  // 2000
     //searchCate.set('LGEG > DNS > французский холодильник' , 'французский холодильник'); // 0 결과없어서 주석처리
@@ -240,37 +240,37 @@ async function getSearchCate() {
 }
 
 
-async function parsingItemList(categoryList, detailPage, pageNum, coltBaseUrlList) {
-    let rank = coltBaseUrlList.length + 1;
+async function parsingItemList(categoryList : Array<string>, detailPage : any, pageNum : number, coltBaseUrlList : Array<ColtBaseUrlItem>) : Promise<void>{
+    let rank : number = coltBaseUrlList.length + 1;
 
-    detailPage('div.products-page__content > div.products-page__list  div.catalog-product.ui-button-widget').each((index, content) => {
-        let bsItem = new ColtBaseUrlItem(new ColtShelfItem());
-        let bsCate = new ColtBaseUrlCate();
-        let bsRank = new ColtBaseUrlRank();
-        let parentDiv = detailPage(content);
-        let url = 'https://www.dns-shop.ru' + parentDiv.find('div > a ').attr('href');
-        let goodsName = parentDiv.find('div > a > span').text();
-        let thumbnail = parentDiv.find('div.catalog-product__image > a > picture > img').attr('src');
+    detailPage('div.products-page__content > div.products-page__list  div.catalog-product.ui-button-widget').each((index : number, content : any) => {
+        let bsItem : ColtBaseUrlItem = new ColtBaseUrlItem(new ColtShelfItem());
+        let bsCate : ColtBaseUrlCate = new ColtBaseUrlCate();
+        let bsRank : ColtBaseUrlRank = new ColtBaseUrlRank();
+        let parentDiv : any = detailPage(content);
+        let url : string = 'https://www.dns-shop.ru' + parentDiv.find('div > a ').attr('href');
+        let goodsName : string = parentDiv.find('div > a > span').text();
+        let thumbnail : string = parentDiv.find('div.catalog-product__image > a > picture > img').attr('src');
         if (typeof thumbnail == "undefined" || thumbnail == null) {
             thumbnail = '';
         }
-        let priceDiv = parentDiv.find('div.product-buy__price').text().replaceAll(/\s+/gm, '');
-        let priceInfo = priceDiv.split('₽')
-        let orgPrice = Math.max(priceInfo[0], priceInfo[1]);
-        let disPrice = Math.min(priceInfo[0], priceInfo[1]);
+        let priceDiv : any = parentDiv.find('div.product-buy__price').text().replaceAll(/\s+/gm, '');
+        let priceInfo : Array<any> = priceDiv.split('₽')
+        let orgPrice : number = Math.max(priceInfo[0], priceInfo[1]);
+        let disPrice : number = Math.min(priceInfo[0], priceInfo[1]);
         if (Object.is(orgPrice, NaN)) orgPrice = 0;
         if (Object.is(disPrice, NaN)) disPrice = 0;
 
-        let avgPoint = parentDiv.find('div.catalog-product__stat > a.catalog-product__rating').attr('data-rating');
-        let totalEvalutCnt = parentDiv.find('div.catalog-product__stat > a.catalog-product__rating').text();
+        let avgPoint : string = parentDiv.find('div.catalog-product__stat > a.catalog-product__rating').attr('data-rating');
+        let totalEvalutCnt : string = parentDiv.find('div.catalog-product__stat > a.catalog-product__rating').text();
         if (totalEvalutCnt.includes('k')) {
             totalEvalutCnt = totalEvalutCnt.replaceAll(/\D+/gm, '');
             totalEvalutCnt = totalEvalutCnt + '000';
         } else if (totalEvalutCnt.includes('нет отзывов')) {
             totalEvalutCnt = totalEvalutCnt.replaceAll(/\D+/gm, '0');
         }
-        let regex = /product\/(\w+)/gm;
-        let itemNum = regex.exec(url)[1];
+        let regex : RegExp = /product\/(\w+)/gm;
+        let itemNum : string = regex.exec(url)[1];
 
         makeItem.makeColtBaseUrlItem(bsItem, url, COLLECT_SITE, itemNum)
         makeItem.makeColtBaseCateItem(bsCate, categoryList)
