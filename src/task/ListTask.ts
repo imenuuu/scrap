@@ -16,8 +16,8 @@ export class ListTask {
 
         const listClassModule = require(this._classPath);
         const listClass = Object.values(listClassModule)[0] as
-            new (config: { [key: string]: any; }, collectSite: string, cnt: number) => AcqList;
-        const list = new listClass(this._config, this._collectSite, 0);
+            new (config: { [key: string]: any; }, collectSite: string) => AcqList;
+        const list = new listClass(this._config, this._collectSite);
         const item = await list.getItemUrls(category);
         return item;
     }

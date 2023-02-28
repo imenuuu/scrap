@@ -23,13 +23,12 @@ class DnsKeywordList implements AcqList {
 
     _glbConfig: { [key: string]: any; };
     collectSite: string;
-    cnt: number;
 
-    constructor(config, collectSite, cnt) {
+
+    constructor(config, collectSite) {
         this._glbConfig = config;
         this._glbConfig.userDataDir = service.LIST_PUPPET_PROFILE;
         this.collectSite = collectSite;
-        this.cnt = cnt;
     }
 
     getFilter() {
