@@ -10,7 +10,7 @@ const puppeteer = require('../../../util/PuppeteerUtil')
 const validator = require('../../../util/ValidatorUtil')
 const wait = require('../../../util/WaitUtil')
 
-class DnsCategory implements AcqCategory {
+class testCategory implements AcqCategory {
 
     _glbConfig: { [key: string]: any; }
     collectSite: string
@@ -45,7 +45,6 @@ class DnsCategory implements AcqCategory {
 
                 const leaf = Leaf.make(cateName, cateUrl, false, false)//  4번째 매개변수는 parentLeaf
                 leaf.parentLeaf = this.leafTraverse.rootLeaf;
-                leaf.depth = this.leafTraverse.rootLeaf.depth + 1;
                 this.leafTraverse.rootLeaf.addChildLeaf(leaf,this.leafTraverse);
             })
             await puppeteer.close(browser, page, this._glbConfig)
@@ -94,4 +93,4 @@ class DnsCategory implements AcqCategory {
     // 이후의 카테고리가 존재할 경우 본인이 third ~ 이후의 function을 만들어서 수집
 
 }
-export {DnsCategory}
+export {testCategory}

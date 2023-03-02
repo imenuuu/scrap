@@ -125,6 +125,10 @@ class LeafTraverse {
 
         if (oneDepth != null && oneDepth.length > 0) {
             for (let l1 of oneDepth) {
+                let cate: Category = new Category();
+                cate.categoryNameList = l1.getLeafNames();
+                cate.categoryUrl = l1.url;
+                cateList.push(cate);
                 if (l1.isLastLeaf() && (l1.url != null || l1.url != undefined)) {
                     let cate: Category = new Category();
                     cate.categoryNameList = l1.getLeafNames();
@@ -177,6 +181,10 @@ class LeafTraverse {
         if (children != null && children.length > 0) {
             for (let l of children) {
                 if (!l.isLastLeaf()) {
+                    let cate: Category = new Category();
+                    cate.categoryNameList = l.getLeafNames();
+                    cate.categoryUrl = l.url;
+                    cateList.push(cate);
                     this.traverse(l, cateList);
                 } else {
                     if (l.url != null || l.url != undefined || l.url != "") {

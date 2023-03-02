@@ -71,6 +71,8 @@ class DnsCategory implements AcqCategory {
                     leaf.addChildLeaf(childLeaf, this.leafTraverse)
                 })
                 await puppeteer.close(browser, page, this._glbConfig)
+
+                await this.third(leaf)
             } catch (e) {
                 logger.error(e.stack)
             } finally {
@@ -78,6 +80,33 @@ class DnsCategory implements AcqCategory {
             }
         }
         return;
+    }
+
+    async third(leaf : Leaf) {
+        for (const secondLeaf of leaf.childLeafList) {           // category Leaf 순회
+            const [browser, context, page] = await puppeteer.getPage(this._glbConfig)
+
+            try {
+                await page.goto(secondLeaf.url, {waitUntil: "networkidle2"}, {timeout: 30000})
+                await wait.sleep(3)
+                const detailPage: any = await cheerio.load(await page.content());
+                detailPage('.subcategory__item-container > a').each((index, content) => {
+                    let parentDiv: any = detailPage(content)
+                    const cateName: string = parentDiv.find('> label').text()
+                    const cateUrl: string = 'https://www.dns-shop.ru' + parentDiv.attr('href')
+                    const childLeaf: Leaf = Leaf.make(cateName, cateUrl, false, false)
+                    childLeaf.parentLeaf = secondLeaf
+                    secondLeaf.addChildLeaf(childLeaf, this.leafTraverse)
+                })
+                await puppeteer.close(browser, page, this._glbConfig)
+
+            } catch (e) {
+                logger.error(e.stack)
+            } finally {
+                await puppeteer.close(browser, page, this._glbConfig)
+            }
+        }
+        return
     }
 
 }

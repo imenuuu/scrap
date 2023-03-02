@@ -16,7 +16,7 @@ const wait = require('../../../util/WaitUtil')
 const COLLECT_SITE : string = '' // 전달받거나 생성규칙이 존재함
 const SITE_NAME : string = '' // 전달받거나 생성규칙이 존재함
 
-class DnsKeywordList implements AcqList {
+class testList implements AcqList {
 
     _glbConfig: { [key: string]: any; };
     collectSite: string;
@@ -167,4 +167,4 @@ async function parsingItemList(categoryList: any, detailPage: any, pageNum: numb
     });
 }
 
-export {DnsKeywordList};
+export {testList};
