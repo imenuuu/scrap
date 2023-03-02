@@ -2,13 +2,14 @@ import type {AcqCategory} from "../AcqCategory";
 import {logger} from "../../../config/logger/Logger";
 import {Leaf} from "../../../data/Leaf";
 import {LeafTraverse} from "../../../data/LeafTraverse";
-import type {Category} from "../../../data/Category";
+import {Category} from "../../../data/Category";
 
 const service = require('../../../config/service.json')
 const cheerio = require('cheerio')
 const puppeteer = require('../../../util/PuppeteerUtil')
 const validator = require('../../../util/ValidatorUtil')
 const wait = require('../../../util/WaitUtil')
+const categoryList = []
 
 class DnsCategory implements AcqCategory {
 
@@ -34,16 +35,28 @@ class DnsCategory implements AcqCategory {
             await wait.sleep(3)
             const detailPage : any = await cheerio.load(await page.content());
             detailPage('.catalog-menu-rootmenu.homepage > div').each((index, content) => {      //cateogry element
-                let parentDiv : any = detailPage(content)
-                let cateUrl : string = 'https://www.dns-shop.ru' + parentDiv.find(' > a').attr('href')
-                let cateName : string = parentDiv.find('> a').text()
-                const leaf : Leaf = Leaf.make(cateName, cateUrl, false, false)//  4번째 매개변수는 parentLeaf
+                let parentDiv: any = detailPage(content)
+                let cateUrl: string = 'https://www.dns-shop.ru' + parentDiv.find(' > a').attr('href')
+                let cateName: string = parentDiv.find('> a').text()
+
+                if (this.isTargetCategory()) {
+                    let category: Category = new Category();
+                    category.categoryNameList = [this.leafTraverse.rootLeaf.name, cateName]
+                    category.categoryUrl = cateUrl;
+                    categoryList.push(category);
+                }
+
+                const leaf: Leaf = Leaf.make(cateName, cateUrl, false, false)//  4번째 매개변수는 parentLeaf
                 leaf.parentLeaf = this.leafTraverse.rootLeaf
-                this.leafTraverse.rootLeaf.addChildLeaf(leaf,this.leafTraverse)
+                this.leafTraverse.rootLeaf.addChildLeaf(leaf, this.leafTraverse)
+
             })
             await puppeteer.close(browser, page, this._glbConfig)
 
-            await this.second()
+            if(await this.isNext()) {
+                await this.second()
+
+            }
         } catch (e) {
             logger.error(e.stack)
         } finally {
@@ -51,7 +64,8 @@ class DnsCategory implements AcqCategory {
         }
 
 
-        return this.leafTraverse.toCategoryList();
+       // return this.leafTraverse.toCategoryList();
+        return categoryList
     }
 
     async second(){
@@ -63,16 +77,30 @@ class DnsCategory implements AcqCategory {
                 await wait.sleep(3)
                 const detailPage : any = await cheerio.load(await page.content());
                 detailPage('.subcategory__item-container > a').each((index, content) => {
-                    let parentDiv : any = detailPage(content)
-                    const cateName : string = parentDiv.find('> label').text()
-                    const cateUrl : string = 'https://www.dns-shop.ru' + parentDiv.attr('href')
-                    const childLeaf : Leaf = Leaf.make(cateName, cateUrl, false, false)
+                    let parentDiv: any = detailPage(content)
+                    const cateName: string = parentDiv.find('> label').text()
+                    const cateUrl: string = 'https://www.dns-shop.ru' + parentDiv.attr('href')
+                    if (this.isTargetCategory()) {
+                        let category: Category = new Category();
+                        category.categoryNameList = []
+                        leaf.parentLeafNameList.forEach((value)=>{
+                            category.categoryNameList.push(value)
+                        })
+                        category.categoryNameList.push(leaf.name)
+                        category.categoryNameList.push(cateName)
+                        category.categoryUrl = cateUrl;
+                        categoryList.push(category);
+                    }
+
+                    const childLeaf: Leaf = Leaf.make(cateName, cateUrl, false, false)
                     childLeaf.parentLeaf = leaf
                     leaf.addChildLeaf(childLeaf, this.leafTraverse)
                 })
                 await puppeteer.close(browser, page, this._glbConfig)
 
-                await this.third(leaf)
+                if(await this.isNext()) {
+                    await this.third(leaf)
+                }
             } catch (e) {
                 logger.error(e.stack)
             } finally {
@@ -94,6 +122,20 @@ class DnsCategory implements AcqCategory {
                     let parentDiv: any = detailPage(content)
                     const cateName: string = parentDiv.find('> label').text()
                     const cateUrl: string = 'https://www.dns-shop.ru' + parentDiv.attr('href')
+
+                    if (this.isTargetCategory()) {
+                        let category: Category = new Category();
+                        category.categoryNameList = []
+
+                        secondLeaf.parentLeafNameList.forEach((value)=>{
+                            category.categoryNameList.push(value)
+                        })
+                        category.categoryNameList.push(secondLeaf.name)
+                        category.categoryNameList.push(cateName)
+                        category.categoryUrl = cateUrl;
+                        categoryList.push(category);
+                    }
+
                     const childLeaf: Leaf = Leaf.make(cateName, cateUrl, false, false)
                     childLeaf.parentLeaf = secondLeaf
                     secondLeaf.addChildLeaf(childLeaf, this.leafTraverse)
@@ -107,6 +149,14 @@ class DnsCategory implements AcqCategory {
             }
         }
         return
+    }
+
+    async isTargetCategory(){
+        return true;
+    }
+
+    async isNext(){
+        return true;
     }
 
 }

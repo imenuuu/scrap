@@ -20,15 +20,11 @@ class testList implements AcqList {
 
     _glbConfig: { [key: string]: any; };
     collectSite: string;
-    cnt: number;
 
     constructor(config: { [key: string]: any; }, collectSite: string) {
         this._glbConfig = config;
         this._glbConfig.userDataDir = service.LIST_PUPPET_PROFILE;
         this.collectSite = collectSite;
-    }
-
-    getFilter() {
     }
 
     async getItemUrls(category : any) {
@@ -99,11 +95,11 @@ class testList implements AcqList {
                     }
 
                     let detailPageUpdate = cheerio.load(await page.content());
-                    parsingItemList(category, detailPageUpdate, pageNum, coltBaseUrlList);
+                    await parsingItemList(category, detailPageUpdate, pageNum, coltBaseUrlList);
 
                 } else {
                     // 1페이지 수집
-                    parsingItemList(category, detailPage, pageNum, coltBaseUrlList);
+                    await parsingItemList(category, detailPage, pageNum, coltBaseUrlList);
                 }
                 await wait.sleep(2);
                 logger.info("pageNum: " + pageNum + " , totalList:" + coltBaseUrlList.length);

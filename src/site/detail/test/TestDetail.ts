@@ -77,7 +77,7 @@ class TestDetail implements AcqDetail {
                 // 할인가가 따로 존재할 때
                 // ColtItemDiscount에 할인가와 할인 비율을 저장
                 if (disPrice > 0) {
-                    const coltDis :any = new ColtItemDiscount();
+                    const coltDis : ColtItemDiscount = new ColtItemDiscount();
                     let discountRate :number = Math.round((orgPrice - disPrice) / orgPrice * 100);
                     await makeItem.makeColtItemDisCount(coltDis, disPrice, discountRate)
                     cItem.coltItemDiscountList.push(coltDis);
@@ -156,7 +156,7 @@ class TestDetail implements AcqDetail {
         cItem.coltItemIvtList.push(ivt);
     }
 
-    async getImageAndVideoInfo(detailPage :any, context :any, cItem :ColtItem) {
+    async getImageAndVideoInfo(detailPage : any, context :any, cItem :ColtItem) {
         let imageList :Array<string> = [];
         let videoList :Array<string> = [];
         try {
