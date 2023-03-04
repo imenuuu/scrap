@@ -45,7 +45,7 @@ class DnsKeywordList implements AcqList {
         try {
             let url: string = category.categoryUrl;
             try {
-                await page.goto(url, {waitUntil: ["domcontentloaded"], timeout: 80000});
+                await page.goto(url, {waitUntil: ["networkidle2"], timeout: 80000});
                 await page.waitForSelector('body > div.container.category-child > div > div.products-page__content > div.products-page__list > div.products-list > div > div > div > div.catalog-product__image > a > picture > img', {visible: true});
                 await page.waitForSelector('div.product-buy__price', {timeout: 80000});
                 await page.mouse.wheel({deltaY: 1000});
@@ -83,11 +83,11 @@ class DnsKeywordList implements AcqList {
             let mod: number = (totalCnt % pageSize);
             if (mod > 0) pageCnt = pageCnt + 1;
 
-            for (let pageNum = 1; pageNum <= pageCnt; pageNum++) {
+            for (let pageNum = 1; pageNum <= 1; pageNum++) {
                 if (pageNum > 1) {
                     try {
                         let urlUpdate = currentUrl + param + pageNum;
-                        await page.goto(urlUpdate, {waitUntil: "domcontentloaded"}, {timeout: 30000})
+                        await page.goto(urlUpdate, {waitUntil: "networkidle2"}, {timeout: 30000})
                         await page.waitForSelector('body > div.container.category-child > div > div.products-page__content > div.products-page__list > div.products-list > div > div > div > div.catalog-product__image > a > picture > img', {visible: true}, {timeout: 15000})
                         await page.waitForSelector('div.product-buy__price', {timeout: 15000});
 

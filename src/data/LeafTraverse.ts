@@ -1,6 +1,8 @@
 import {Leaf} from "./Leaf";
 import type {TargetLeaf} from "./TargetLeaf";
 import {Category} from "./Category";
+import {log} from "winston";
+import {logger} from "../config/logger/Logger";
 
 const Logger = require("../config/logger/Logger");
 
@@ -159,6 +161,7 @@ class LeafTraverse {
             }
         }
 
+        console.log(cateList)
         return cateList;
     }
 

@@ -37,7 +37,10 @@ class DnsCategory implements AcqCategory {
             detailPage('.catalog-menu-rootmenu.homepage > div').each((index, content) => {      //cateogry element
                 let parentDiv: any = detailPage(content)
                 let cateUrl: string = 'https://www.dns-shop.ru' + parentDiv.find(' > a').attr('href')
+                console.log("secondUrl :"+cateUrl)
+
                 let cateName: string = parentDiv.find('> a').text()
+                console.log(cateName)
 
                 if (this.isTargetCategory()) {
                     let category: Category = new Category();
@@ -96,6 +99,7 @@ class DnsCategory implements AcqCategory {
                     childLeaf.parentLeaf = leaf
                     leaf.addChildLeaf(childLeaf, this.leafTraverse)
                 })
+
                 await puppeteer.close(browser, page, this._glbConfig)
 
                 if(await this.isNext()) {

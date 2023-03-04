@@ -10,7 +10,7 @@ const puppeteer = require('../../../util/PuppeteerUtil')
 const validator = require('../../../util/ValidatorUtil')
 const wait = require('../../../util/WaitUtil')
 const categoryList = []
-class testCategory implements AcqCategory {
+class makroCategory implements AcqCategory {
 
     _glbConfig: { [key: string]: any; }
     collectSite: string
@@ -32,7 +32,6 @@ class testCategory implements AcqCategory {
             // '' 안에 사이트 명을 작성
 
             await page.goto(url, {waitUntil: "networkidle2"}, {timeout: 30000})
-
             await wait.sleep(3)
             const detailPage = await cheerio.load(await page.content());
 
@@ -89,6 +88,7 @@ class testCategory implements AcqCategory {
                     let cateName : string = parentDiv.find('> div > div ').text(); // category name 엘리먼트 받아오기
                     let scrapUrl=parentDiv.attr('href')
                     let cateUrl : string = 'https://www.makro.co.za'+parentDiv.attr('href')
+
 
                     if (this.isTargetCategory()&&scrapUrl) {
                         if(scrapUrl.includes('https://www.makro.co.za')){
@@ -243,4 +243,4 @@ class testCategory implements AcqCategory {
 
 
 }
-export {testCategory}
+export {makroCategory}
