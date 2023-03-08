@@ -1,17 +1,17 @@
 import {DnsCategory} from "./src/site/category/dns/DnsCategory";
 
-import {makroCategory} from "./src/site/category/makro/makroCategory";
+import {MakroCategory} from "./src/site/category/makro/MakroCategory";
 import {AlkostoCategory} from "./src/site/category/test/AlkostoCategory";
 
 
 
 import {DnsDetail} from "./src/site/detail/dns/DnsDetail";
-import {makroDetail} from "./src/site/detail/makro/makroDetail";
+import {MakroDetail} from "./src/site/detail/makro/MakroDetail";
 
 import {options as chromeConfig} from "./src/config/chrome/ChromeConfig";
 
 import {DnsKeywordList} from "./src/site/list/dns/DnsKeywordList";
-import {makroList} from "./src/site/list/makro/makroList";
+import {MakroList} from "./src/site/list/makro/MakroList";
 
 async function launch(){
     const category = {}
@@ -25,8 +25,11 @@ async function launch(){
 
      */
 
-    const item = await new AlkostoCategory(chromeConfig,'lg.alkosto.com',[])
+    /*
+    const item = await new MakroCategory(chromeConfig,'lg.makro.co.za',[])
         .getCategory({})
+
+     */
 
 
 
@@ -39,18 +42,22 @@ async function launch(){
 
      */
 
-    /*
 
+
+    /*
     category['categoryNameList'] = [ 'Makro', ' Appliances', ' Fridges & Freezers', ' Wine Fridges']
-    category['categoryUrl'] = "https://www.makro.co.za/appliances/fridges-freezers/wine-fridges/c/AAC"
+    category['categoryUrl'] = "https://www.makro.co.za/electronics-computers/cellphones/cellphone-handsets/c/BGB"
     category['categoryNameList'] = category['categoryNameList'].join( " > ")
-    const item = await new makroList(chromeConfig,'lg.makro.co.za').getItemUrls(category)
+    const item = await new MakroList(chromeConfig,'lg.makro.co.za').getItemUrls(category)
+
+     */
 
 
-    /*
+
 
     // detail용 실행
-/*
+
+    /*
     const item = await new DnsDetail(chromeConfig,'lg.dns-shop.ru')
         .extractItemDetail("https://www.dns-shop.ru/product/232ec529f8212ff2/fen-enchen-air-hair-dryer-basic-version-belyj")
 
@@ -59,10 +66,9 @@ async function launch(){
  */
 //makro detail/*
 
-    /*
-    const item = await new MacroDetail(chromeConfig,'lg.makro.co.za')
-        .extractItemDetail("https://www.makro.co.za/appliances/fridges-freezers/wine-fridges/wine-coolers/swan-85-l-78-can-glass-door-beverage-cooler-/p/000000000000309923_EA")
-*/
+
+    const item = await new MakroDetail(chromeConfig,'lg.makro.co.za')
+        .extractItemDetail("https://www.makro.co.za/electronics-computers/cellphones/cellphone-handsets/devices/blackview-a95-6-5-inch-android-11-8gb-128gb-smartphone-with-cover---pink/p/775bab71-f606-492d-8ae7-a54f26819f4e")
 
     //console.log(JSON.stringify(item))
 

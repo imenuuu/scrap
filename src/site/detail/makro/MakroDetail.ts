@@ -15,7 +15,7 @@ const makeItem = require('../../../util/ItemUtil')
 const puppeteer = require('../../../util/PuppeteerUtil')
 const validator = require('../../../util/ValidatorUtil')
 
-class makroDetail implements AcqDetail {
+class MakroDetail implements AcqDetail {
 
     _glbConfig: { [key: string]: any; };
     collectSite: string;
@@ -35,6 +35,8 @@ class makroDetail implements AcqDetail {
                 try {
                     //URL로 페이지 진입
                     await page.goto(url, {waitUntil: "networkidle2"}, {timeout: 30000});
+                    await page.click('a.product-details-moreless-button.show.text-center');
+
                     await wait.sleep(3);
 
                     /*
@@ -47,12 +49,13 @@ class makroDetail implements AcqDetail {
                 let cItem :ColtItem = new ColtItem();
                 const detailPage :any = cheerio.load(await page.content());
 
+
                 let goodsName :string = detailPage('h1.mak-mb-0.mak-typo__large20.pull-left.js-product-name.capitalize').text();
                 let itemNum :string = await this.getItemNum(url, detailPage);
 
                 // goodsName이 파싱되지 않았을경우에 정상적인 item페이지가 아닌걸로 확인하여 makeNotFoundColtItem을 호출한다
                 if (!await validator.isNotUndefinedOrEmpty(goodsName)) {
-                    await makeItem.makeNotFoundColtItem(cItem, url, this.collectSite, itemNum, detailPage, 'ZAR');
+                    await makeItem.makeNotFoundColtItem(cItem, url, this.collectSite, itemNum, detailPage, "033");
                     return cItem;
                 }
 
@@ -124,7 +127,7 @@ class makroDetail implements AcqDetail {
 
 
                 // makeColtItem생성
-                await makeItem.makeColtItem(cItem, url, this.collectSite, 'Makro', 'ZAR', goodsName, itemNum, goodsCate,
+                await makeItem.makeColtItem(cItem, url, this.collectSite, 'Makro', "033", goodsName, itemNum, goodsCate,
                     brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice, disPrice);
 
                 //--image and video--
@@ -254,18 +257,35 @@ class makroDetail implements AcqDetail {
 
 
 
-        try{
-            detailPage('div.row.col-xs-12.col-sm-12 > div.mak-content__box-container > div').each((index,content)=>{
+        detailPage('div.col-xs-12.col-sm-12.mak-content__box-container > table > tbody > tr').each((index,content)=>{
+            let parentDiv=detailPage(content)
+            let key : string = parentDiv.find('td.attrib.col-xs-12.col-md-4.mak-padding-8.mak-typo__grey').text()
+            let value : string = parentDiv.find('td.col-xs-12.col-md-8.mak-padding-8').text()
+            addinfoObj[key] = value;
+
+        });
+
+
+        detailPage('div.row.col-xs-12.col-sm-12 > div.mak-content__box-container > div').each((index,content)=>{
                 let parentDiv=detailPage(content)
                 let key : string = parentDiv.find('div.col-xs-12.col-md-4.no-space.mak-typo__grey').text()
                 let value : string = parentDiv.find('div.col-xs-12.col-md-8.no-space').text()
-                if (validator.isNotUndefinedOrEmpty(key) && validator.isNotUndefinedOrEmpty(value)) {
-                    if (key.includes('Model')) addinfoObj[key] = value;
-                }
-            });
-        } catch (error) {
-            console.log('getAddInfo Fail');
-        }
+                addinfoObj[key] = value;
+        });
+
+        detailPage('div.pdp-product-details-moretext > div.row.col-xs-12.col-sm-12.col-md-12> div.mak-content__box-container > div.row.mak-bg__light.mak-padding-8 > div').each((index,content)=>{
+            let parentDiv=detailPage(content)
+
+            let key: string = parentDiv.find('div.col-xs-12.col-md-4.no-space.mak-typo__grey').text()
+            if(key) {
+                let value: string = parentDiv.find('div.col-xs-12.col-md-8.no-space').text()
+
+                addinfoObj[key] = value;
+            }
+        });
+
+
+
 
         return jsonToStr(addinfoObj);
     }
@@ -308,4 +328,4 @@ class makroDetail implements AcqDetail {
 }
 
 
-export {makroDetail};
+export {MakroDetail};

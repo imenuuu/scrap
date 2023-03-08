@@ -24,7 +24,7 @@ const proxyConfig = {
 export const options = {
     args,
     proxyConfig,
-    headless: true,
+    headless: false,
     ignoreHTTPSErrors: true,
     defaultViewport: null,
     // executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",

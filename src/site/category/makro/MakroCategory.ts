@@ -10,7 +10,7 @@ const puppeteer = require('../../../util/PuppeteerUtil')
 const validator = require('../../../util/ValidatorUtil')
 const wait = require('../../../util/WaitUtil')
 const categoryList = []
-class makroCategory implements AcqCategory {
+class MakroCategory implements AcqCategory {
 
     _glbConfig: { [key: string]: any; }
     collectSite: string
@@ -243,4 +243,4 @@ class makroCategory implements AcqCategory {
 
 
 }
-export {makroCategory}
+export {MakroCategory}

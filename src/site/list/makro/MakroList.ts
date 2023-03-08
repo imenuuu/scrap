@@ -15,7 +15,7 @@ const wait = require('../../../util/WaitUtil')
 const COLLECT_SITE : string = 'lg.makro.co.za' // 전달받거나 생성규칙이 존재함
 const SITE_NAME : string = 'Makro' // 전달받거나 생성규칙이 존재함
 
-class makroList implements AcqList {
+class MakroList implements AcqList {
 
     _glbConfig: { [key: string]: any; };
     collectSite: string;
@@ -40,12 +40,10 @@ class makroList implements AcqList {
             try {
                 await page.goto(url, {waitUntil: ["networkidle2"], timeout: 80000});
 
-                console.log("getItemUrl1")
                 await page.waitForSelector('div.mak-product-tiles-container__product-tile.bv-product-tile.mak-product-card-inner-wrapper', {visible: true}); // ''안에 필요한 selector 삽입
                 await page.waitForSelector('div.mak-product-tiles-container.listview.GRID > div > div > div.col-xs-12.no-space > div > div > div > div > div.bv_averageRating_component_container > div', {visible: true});
 
 
-                console.log("getItemUrl2")
 
 
                 //await page.mouse.wheel({deltaY: 1000});
@@ -89,17 +87,15 @@ class makroList implements AcqList {
             for (let pageNum = 0; pageNum <= pageCnt-1; pageNum++) {
                 if (pageNum > 0) { // 2페이지 이후 수집
                     try {
-                        console.log("2페이지")
 
                         let urlUpdate : string = url + param + pageNum +'&q=%3Arelevance' ; // URL변경
-                        console.log(urlUpdate)
                         //ex www.test.com?page=1 ==> www.test.com?page=2
                         
                         await page.goto(urlUpdate, {waitUntil: "networkidle2"}, {timeout: 30000})
                         await page.waitForSelector('div.mak-product-tiles-container__product-tile.bv-product-tile.mak-product-card-inner-wrapper', {visible: true}); // ''안에 필요한 selector 삽입
                         await page.waitForSelector('div.mak-product-tiles-container.listview.GRID > div > div > div.col-xs-12.no-space > div > div > div > div > div.bv_averageRating_component_container > div', {visible: true});
+                        await page.waitForSelector('div.mak-product-tiles-container.listview.GRID > div > a > img', {visible: true}, {timeout: 15000}); // ''안에 필요한 selector 삽입
 
-                        await page.mouse.wheel({deltaY: 1000});
                         // 마우스 스크롤이 필요하면 주석해제
                         // 필요한만큼 복사해서 사용하세요.
                     } catch (error) {
@@ -115,7 +111,6 @@ class makroList implements AcqList {
 
                 } else {
                     // 1페이지 수집
-                    console.log("1페이지")
                     await parsingItemList(category, detailPage, pageNum, coltBaseUrlList);
                 }
                 await wait.sleep(2);
@@ -137,6 +132,7 @@ async function parsingItemList(categoryList: any, detailPage: any, pageNum: numb
     let rank = coltBaseUrlList.length + 1;
 
     detailPage('div.mak-product-tiles-container.listview.GRID > div').each((index : number, content) => { // '' 안에 리스트 Element 작성
+
         let bsItem : ColtBaseUrlItem = new ColtBaseUrlItem(new ColtShelfItem());
 
         let bsCate : ColtBaseUrlCate = new ColtBaseUrlCate();
@@ -217,7 +213,7 @@ async function parsingItemList(categoryList: any, detailPage: any, pageNum: numb
         makeItem.makeColtBaseRankItem(bsRank, rank)
         makeItem.makeColtShelfItem(bsItem, url, COLLECT_SITE, SITE_NAME, goodsName, orgPrice, disPrice, totalEvalutCnt,
             avgPoint, thumbnail, '')
-        
+
         // 주입된 DTO를 결과리스트에 저장
         bsItem.coltBaseUrlCateList.push(bsCate)
         bsItem.coltBaseUrlRank = (bsRank);
@@ -227,4 +223,4 @@ async function parsingItemList(categoryList: any, detailPage: any, pageNum: numb
     });
 }
 
-export {makroList};
+export {MakroList};
