@@ -35,6 +35,9 @@ class MakroCategory implements AcqCategory {
             await wait.sleep(3)
             const detailPage = await cheerio.load(await page.content());
 
+
+
+
             detailPage('.owl-stage > div').each((index, content) => {      //cateogry element
                 let parentDiv = detailPage(content)
 

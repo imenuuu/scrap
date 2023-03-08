@@ -223,10 +223,11 @@ class MakroDetail implements AcqDetail {
         try {
             detailPage('div.owl-stage > div').each((index,content)=>{
                 let parentDiv=detailPage(content)
-                let imgUrl=parentDiv.find('div > div > img ').attr('src')
-                imageList.push(imgUrl);
+                let imgUrl=parentDiv.find('div > div > img.lazyOwl.owl-lazy.mak-responsive-img.mak-hover-img ').attr('src')
+                imageList.push(imgUrl.trim());
 
             });
+            console.log(imageList)
             /*
             * imageUrl, videoUrl을 가져온다
             */

@@ -44,13 +44,15 @@ async function launch(){
 
 
 
-    /*
+/*
     category['categoryNameList'] = [ 'Makro', ' Appliances', ' Fridges & Freezers', ' Wine Fridges']
-    category['categoryUrl'] = "https://www.makro.co.za/electronics-computers/cellphones/cellphone-handsets/c/BGB"
+    category['categoryUrl'] = "https://www.makro.co.za/electronics-computers/cellphones/power-banks-chargers/c/BGC"
     category['categoryNameList'] = category['categoryNameList'].join( " > ")
     const item = await new MakroList(chromeConfig,'lg.makro.co.za').getItemUrls(category)
 
-     */
+
+ */
+
 
 
 
@@ -67,12 +69,15 @@ async function launch(){
 //makro detail/*
 
 
+
     const item = await new MakroDetail(chromeConfig,'lg.makro.co.za')
-        .extractItemDetail("https://www.makro.co.za/electronics-computers/cellphones/cellphone-handsets/devices/blackview-a95-6-5-inch-android-11-8gb-128gb-smartphone-with-cover---pink/p/775bab71-f606-492d-8ae7-a54f26819f4e")
+        .extractItemDetail("https://www.makro.co.za/beverages-liquor/soft-drinks-juices/cold-drinks/2l-non-returnable-bottles/schweppes-lemonade-soft-drink-1l/p/00000340000000035383_EA")
 
-    //console.log(JSON.stringify(item))
 
-    console.log(item)
+
+    console.log(JSON.stringify(item))
+
+    //console.log(item)
 
 
 }

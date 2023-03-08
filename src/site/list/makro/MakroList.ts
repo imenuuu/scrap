@@ -38,10 +38,17 @@ class MakroList implements AcqList {
         try {
             let url : string = category.categoryUrl;
             try {
+
+
+                if(page('div.page-content-header > h').text()){
+                    logger.info('#Not Correct Url ->  + url' + url);
+                    return coltBaseUrlList;
+                }
                 await page.goto(url, {waitUntil: ["networkidle2"], timeout: 80000});
 
                 await page.waitForSelector('div.mak-product-tiles-container__product-tile.bv-product-tile.mak-product-card-inner-wrapper', {visible: true}); // ''안에 필요한 selector 삽입
                 await page.waitForSelector('div.mak-product-tiles-container.listview.GRID > div > div > div.col-xs-12.no-space > div > div > div > div > div.bv_averageRating_component_container > div', {visible: true});
+
 
 
 
@@ -57,6 +64,8 @@ class MakroList implements AcqList {
             }
             detailPage = cheerio.load(await page.content());
 
+
+
             let total = detailPage('div.mak-content.mak-plp-list > div > div > div.col-xs-8.visible-xs.visible-sm.mak-content__box-pad-x-reset > h1 > span').text(); // 총 아이템 갯수를 받아오는 부분
 
             const match = total.match(/\((\d+)\)/);
@@ -70,6 +79,9 @@ class MakroList implements AcqList {
 
             logger.info('#Category: ' + category.categoryNameList + ', List Total Count: ' + totalCnt);
 
+
+
+
             if (totalCnt == 0) {
                 logger.info('#Empty Result!, cate -> ' + category.categoryNameList + ' , url -> ' + url)
                 return coltBaseUrlList;
@@ -78,7 +90,7 @@ class MakroList implements AcqList {
             let pageSize = 20; // 한 페이지당 아이템의 갯수를 작성
 
             let pageCnt = Math.floor((totalCnt / pageSize)); // 총갯수/한페이지당 아이템 갯수 = 수집해야할 페이지수
-            
+
             let mod = (totalCnt % pageSize); // 나머지 체크
             console.log(mod)
 
@@ -90,7 +102,9 @@ class MakroList implements AcqList {
 
                         let urlUpdate : string = url + param + pageNum +'&q=%3Arelevance' ; // URL변경
                         //ex www.test.com?page=1 ==> www.test.com?page=2
-                        
+                        await page.mouse.wheel({deltaY: 1000});
+                        await page.mouse.wheel({deltaY: 1000});
+                        await page.mouse.wheel({deltaY: 1000});
                         await page.goto(urlUpdate, {waitUntil: "networkidle2"}, {timeout: 30000})
                         await page.waitForSelector('div.mak-product-tiles-container__product-tile.bv-product-tile.mak-product-card-inner-wrapper', {visible: true}); // ''안에 필요한 selector 삽입
                         await page.waitForSelector('div.mak-product-tiles-container.listview.GRID > div > div > div.col-xs-12.no-space > div > div > div > div > div.bv_averageRating_component_container > div', {visible: true});
@@ -132,7 +146,6 @@ async function parsingItemList(categoryList: any, detailPage: any, pageNum: numb
     let rank = coltBaseUrlList.length + 1;
 
     detailPage('div.mak-product-tiles-container.listview.GRID > div').each((index : number, content) => { // '' 안에 리스트 Element 작성
-
         let bsItem : ColtBaseUrlItem = new ColtBaseUrlItem(new ColtShelfItem());
 
         let bsCate : ColtBaseUrlCate = new ColtBaseUrlCate();
@@ -148,14 +161,24 @@ async function parsingItemList(categoryList: any, detailPage: any, pageNum: numb
         /*
         console.log(url)
         console.log(goodsName)
-        console.log(thumbnail)
 
          */
 
+
+
+
+
         if (typeof thumbnail == "undefined" || thumbnail == null) {
             // 상품 이미지가 없을경우를 대비해서 예외처리.
-            thumbnail = '';
+            let thumbnailData  : string =  parentDiv.find('> a > img').attr('data-src')
+            if(thumbnailData){
+                thumbnail=thumbnailData;
+            }
+            else {
+                thumbnail = '';
+            }
         }
+
 
         let orgPriceText : any = parentDiv.find('> div > p > span.mak-save-price').text(); // 기본가격 기입
         let orgPriceCent : any = parentDiv.find('> div > p > span.mak-product__cents').text();
