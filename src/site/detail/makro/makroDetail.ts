@@ -15,7 +15,7 @@ const makeItem = require('../../../util/ItemUtil')
 const puppeteer = require('../../../util/PuppeteerUtil')
 const validator = require('../../../util/ValidatorUtil')
 
-class MacroDetail implements AcqDetail {
+class makroDetail implements AcqDetail {
 
     _glbConfig: { [key: string]: any; };
     collectSite: string;
@@ -52,7 +52,7 @@ class MacroDetail implements AcqDetail {
 
                 // goodsName이 파싱되지 않았을경우에 정상적인 item페이지가 아닌걸로 확인하여 makeNotFoundColtItem을 호출한다
                 if (!await validator.isNotUndefinedOrEmpty(goodsName)) {
-                    await makeItem.makeNotFoundColtItem(cItem, url, this.collectSite, itemNum, detailPage, '사이트가 해당하는 나라의 stdCode');
+                    await makeItem.makeNotFoundColtItem(cItem, url, this.collectSite, itemNum, detailPage, 'ZAR');
                     return cItem;
                 }
 
@@ -65,6 +65,7 @@ class MacroDetail implements AcqDetail {
                     goodsCate = 'NO_CATEGORY';
                 }
 
+                const product_code : string = itemNum
 
                 let brand_name :string = detailPage('div.col-md-4.col-sm-3.no-space > a > u').text();
                 let avgPoint :number = parseInt(detailPage('div.bv_avgRating_component_container.notranslate').text());
@@ -76,53 +77,55 @@ class MacroDetail implements AcqDetail {
                     totalEvalutCnt=parseInt(match[1])
                 }
 
-                let addInfo :string = await this.getAddInfo(detailPage);
+                let addInfo :string = await this.getAddInfo(product_code ,detailPage);
 
-                let orgPriceText : any = detailPage('p.price > span.mak-save-price').text(); // 기본가격 기입
+                let orgPriceText : any = detailPage('div.pdp-CTA-container > div.product-ProductNamePrice > div > p > span.mak-save-price').text(); // 기본가격 기입
+                let orgPriceCent : any = detailPage('div.pdp-CTA-container > div.product-ProductNamePrice > div > p > span.mak-product__cents').text();
                 let disPriceText : any = detailPage('div.priceData-savings > span.makro-darkgreen > span > span.mak-save-price').text(); // 할인가격 기입
+                let disPriceCent : any = detailPage('div.priceData-savings > span.makro-darkgreen > span > span.mak-product__cents').text()
 
-
+                console.log(orgPriceText)
 
                 let orgPrice : any = 0;
                 let disPrice : any = 0;
 
                 let realOrgPrice : number = 0;
-                if (!Object.is(orgPriceText, NaN)){
+                if (isNaN(orgPriceText)){
                     orgPrice = (orgPriceText.replace('R ', ''));
-                    orgPrice = parseInt(orgPrice.replace(',', ''))
+                    orgPrice = parseInt(orgPrice.replace(',', ''))+parseInt(orgPriceCent)/100
+
                 }
-                else {
-                    orgPrice = 0;
-                }
-                if (!Object.is(disPriceText, NaN)){
+                if (isNaN(disPriceText)){
                     disPrice = (disPriceText.replace('R ', ''));
-                    disPrice = parseInt(disPrice.replace(',', ''))
-                    realOrgPrice=orgPrice+disPrice //진짜가격
-                    disPrice=orgPrice
+                    disPrice = parseInt(disPrice.replace(',', ''))+parseInt(disPriceCent)/100
+
+                    orgPrice=orgPrice+disPrice
+                    disPrice=orgPrice-disPrice
 
                 }
-                else {
-                    disPrice = 0;
-                }
-
+                console.log("realOrgPrice")
+                console.log(orgPrice)
+                console.log("disPriceText")
+                console.log(disPrice)
 
                 // ColtItemIvt에는 할인가가 존재할때는 할인가를 넣어주고 할인가가 없으면 정가를 넣어준다
-                let ivtAddPrice :number = realOrgPrice;
+                let ivtAddPrice :number = orgPrice;
 
                 // 할인가가 따로 존재할 때
                 // ColtItemDiscount에 할인가와 할인 비율을 저장
                 if (disPrice > 0) {
-                    const coltDis : ColtItemDiscount = new ColtItemDiscount();
-                    let discountRate :number = Math.round((realOrgPrice - disPrice) / realOrgPrice * 100);
+                    const coltDis :any = new ColtItemDiscount();
+                    ivtAddPrice = disPrice;
+                    let discountRate :number = Math.round((orgPrice - disPrice) / orgPrice * 100);
                     await makeItem.makeColtItemDisCount(coltDis, disPrice, discountRate)
                     cItem.coltItemDiscountList.push(coltDis);
-                    // ivtAddPrice에 할인가 저장
-                    ivtAddPrice = disPrice;
                 }
 
+
+
                 // makeColtItem생성
-                await makeItem.makeColtItem(cItem, url, this.collectSite, 'Makro', '수집하는 사이트의 stdCode', goodsName, itemNum, goodsCate,
-                    brand_name, avgPoint, totalEvalutCnt, addInfo, realOrgPrice, disPrice);
+                await makeItem.makeColtItem(cItem, url, this.collectSite, 'Makro', 'ZAR', goodsName, itemNum, goodsCate,
+                    brand_name, avgPoint, totalEvalutCnt, addInfo, orgPrice, disPrice);
 
                 //--image and video--
                 await this.getImageAndVideoInfo(detailPage, context, cItem);
@@ -150,6 +153,19 @@ class MacroDetail implements AcqDetail {
         let option3 :string = '';
         let option4 :string = '';
 
+
+        try {
+            detailPage('div.col-xs-12.mak-select-holder.mak-mb-small.pl-0.pr-0 > div').each((index,content)=>{
+                let parentDiv=detailPage(content)
+                let option=parentDiv.find('> div.col-sm-5.col-xs-5.mak-padding-xs > label ').text()
+                optionList.push(option);
+                console.log(option)
+
+            });
+
+        } catch (error) {
+            console.log('getOption Fail');
+        }
         /*
         * optionList에 옵션 가져오기
         */
@@ -180,10 +196,17 @@ class MacroDetail implements AcqDetail {
 
         // stockOption 은 재고있음과 재고없음 둘로 나뉜다(In stock, Out of stock)
         let stockOption :string = 'In stock';
+
         let stockAmout :number = -999;
 
-        if('재고 없음의 조건')
-            stockOption = 'Out of stock';
+        let soldOut : string = detailPage('div.not-shopable-container').text()
+
+        console.log(soldOut)
+        if(soldOut == ' Sold Out'){
+            stockOption = 'Out of stock'
+        }
+
+
 
         // ColtItemIvt를 생성하여 ColtItem에 추가
         const ivt :ColtItemIvt = new ColtItemIvt();
@@ -199,7 +222,6 @@ class MacroDetail implements AcqDetail {
                 let parentDiv=detailPage(content)
                 let imgUrl=parentDiv.find('div > div > img ').attr('src')
                 imageList.push(imgUrl);
-                console.log(imgUrl)
 
             });
             /*
@@ -225,16 +247,26 @@ class MacroDetail implements AcqDetail {
         
     }
 
-    async getAddInfo(detailPage :any) :Promise<string>{
+    async getAddInfo(product_code : string,detailPage :any) :Promise<string>{
         let addinfoObj :Object = new Object();
-        let infoList :Array<any> = detailPage("addInfo 목록 파싱부분")
-        for (let info of Array.from(infoList)) {
-            let key :string = '';
-            let value :string = '';
-            if (validator.isNotUndefinedOrEmpty(key) && validator.isNotUndefinedOrEmpty(value)) {
-                addinfoObj[key] = value;
-            }
+
+        addinfoObj['productCode'] = product_code
+
+
+
+        try{
+            detailPage('div.row.col-xs-12.col-sm-12 > div.mak-content__box-container > div').each((index,content)=>{
+                let parentDiv=detailPage(content)
+                let key : string = parentDiv.find('div.col-xs-12.col-md-4.no-space.mak-typo__grey').text()
+                let value : string = parentDiv.find('div.col-xs-12.col-md-8.no-space').text()
+                if (validator.isNotUndefinedOrEmpty(key) && validator.isNotUndefinedOrEmpty(value)) {
+                    if (key.includes('Model')) addinfoObj[key] = value;
+                }
+            });
+        } catch (error) {
+            console.log('getAddInfo Fail');
         }
+
         return jsonToStr(addinfoObj);
     }
 
@@ -246,7 +278,6 @@ class MacroDetail implements AcqDetail {
         detailPage('ol.breadcrumb > li ').each((index, el) => {
             let cateName :string = '';
             if (index == catelength -1 ) {
-                console.log(index+"멈춤")
                 return;
             } else if (index == catelength) {
                 cateName = detailPage(el).text();
@@ -277,4 +308,4 @@ class MacroDetail implements AcqDetail {
 }
 
 
-export {MacroDetail};
+export {makroDetail};

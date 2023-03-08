@@ -1,10 +1,12 @@
 import {DnsCategory} from "./src/site/category/dns/DnsCategory";
 
 import {makroCategory} from "./src/site/category/makro/makroCategory";
+import {AlkostoCategory} from "./src/site/category/test/AlkostoCategory";
+
 
 
 import {DnsDetail} from "./src/site/detail/dns/DnsDetail";
-import {MacroDetail} from "./src/site/detail/makro/MacroDetail";
+import {makroDetail} from "./src/site/detail/makro/makroDetail";
 
 import {options as chromeConfig} from "./src/config/chrome/ChromeConfig";
 
@@ -16,12 +18,16 @@ async function launch(){
 
 
 
-    //매개 변수는 사이트 메인페이지
+    //makro 카테고리
     /*
     const item = await new makroCategory(chromeConfig,'lg.makro.co.za',[])
         .getCategory({})
 
      */
+
+    const item = await new AlkostoCategory(chromeConfig,'lg.alkosto.com',[])
+        .getCategory({})
+
 
 
      // list용 실행
@@ -32,14 +38,16 @@ async function launch(){
      const item = await new DnsKeywordList(chromeConfig,'lg.dns-shop.ru').getItemUrls(category)
 
      */
-/*
+
+    /*
 
     category['categoryNameList'] = [ 'Makro', ' Appliances', ' Fridges & Freezers', ' Wine Fridges']
     category['categoryUrl'] = "https://www.makro.co.za/appliances/fridges-freezers/wine-fridges/c/AAC"
     category['categoryNameList'] = category['categoryNameList'].join( " > ")
     const item = await new makroList(chromeConfig,'lg.makro.co.za').getItemUrls(category)
 
- */
+
+    /*
 
     // detail용 실행
 /*
@@ -49,12 +57,18 @@ async function launch(){
 
 
  */
+//makro detail/*
 
+    /*
     const item = await new MacroDetail(chromeConfig,'lg.makro.co.za')
-        .extractItemDetail("https://www.makro.co.za/merchandising-hierarchy/daily-deals/swan-70-l-24-bottle-wine-cooler-/p/000000000000266401_EA")
+        .extractItemDetail("https://www.makro.co.za/appliances/fridges-freezers/wine-fridges/wine-coolers/swan-85-l-78-can-glass-door-beverage-cooler-/p/000000000000309923_EA")
+*/
 
+    //console.log(JSON.stringify(item))
 
     console.log(item)
+
+
 }
 
 

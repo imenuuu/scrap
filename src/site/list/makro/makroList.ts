@@ -162,31 +162,35 @@ async function parsingItemList(categoryList: any, detailPage: any, pageNum: numb
         }
 
         let orgPriceText : any = parentDiv.find('> div > p > span.mak-save-price').text(); // 기본가격 기입
+        let orgPriceCent : any = parentDiv.find('> div > p > span.mak-product__cents').text();
+
         let disPriceText : any = parentDiv.find('> div > div.col-xs-12.saving > span.mak-save-price').text(); // 할인가격 기입
+        let disPriceCent : any = parentDiv.find('> div > div.col-xs-12.saving > span.mak-product__cents').text()
+
 
 
 
         let orgPrice : any = 0;
         let disPrice : any = 0;
 
-        let realOrgPrice : number = 0;
-        if (!Object.is(orgPriceText, NaN)){
+        if (isNaN(orgPriceText)){
             orgPrice = (orgPriceText.replace('R ', ''));
-            orgPrice = parseInt(orgPrice.replace(',', ''))
-        }
-        else {
-            orgPrice = 0;
-        }
-        if (!Object.is(disPriceText, NaN)){
-            disPrice = (disPriceText.replace('R ', ''));
-            disPrice = parseInt(disPrice.replace(',', ''))
-            realOrgPrice=orgPrice+disPrice
-            disPrice=orgPrice
+            orgPrice = parseInt(orgPrice.replace(',', ''))+parseInt(orgPriceCent)/100
+
 
         }
-        else {
-            disPrice = 0;
+        if (isNaN(disPriceText)){
+            disPrice = (disPriceText.replace('R ', ''));
+            disPrice = parseInt(disPrice.replace(',', ''))+parseInt(disPriceCent)/100
+            orgPrice=orgPrice+disPrice
+            disPrice=orgPrice
+
+
         }
+
+
+
+
 
 
 
@@ -211,7 +215,7 @@ async function parsingItemList(categoryList: any, detailPage: any, pageNum: numb
         makeItem.makeColtBaseUrlItem(bsItem, url, COLLECT_SITE, itemNum)
         makeItem.makeColtBaseCateItem(bsCate, categoryList)
         makeItem.makeColtBaseRankItem(bsRank, rank)
-        makeItem.makeColtShelfItem(bsItem, url, COLLECT_SITE, SITE_NAME, goodsName, realOrgPrice, disPrice, totalEvalutCnt,
+        makeItem.makeColtShelfItem(bsItem, url, COLLECT_SITE, SITE_NAME, goodsName, orgPrice, disPrice, totalEvalutCnt,
             avgPoint, thumbnail, '')
         
         // 주입된 DTO를 결과리스트에 저장
