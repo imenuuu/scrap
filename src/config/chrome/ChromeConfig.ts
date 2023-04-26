@@ -14,6 +14,7 @@ var args = [
     ,'--disable-features=IsolateOrigins,site-per-process'
     ,'--disable-blink-features=AutomationControlled'
     ,'--window-size=1920,1080'
+    ,'—proxy-server=zproxy.lum-superproxy.io:22225'
 ]
 const proxyConfig = {
    username: 'lum-customer-epopcon-zone-zone1',
@@ -29,7 +30,7 @@ export const options = {
     defaultViewport: null,
     // executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     executablePath: "C:/Program Files/Google/Chrome/Application/chrome.exe", //for window
-
+    //executablePath : "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
     // userDataDir: '/Users/usr/git/wspider_node/puppet_profile/detail'
     // product: "chrome"
 

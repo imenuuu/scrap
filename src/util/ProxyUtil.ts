@@ -38,3 +38,10 @@ async function getPageCredential(global) {
         password: global.proxyConfig.password,
     }
 }
+export async function stealthMode(){
+    const puppeteer = require('puppeteer-extra');
+
+    const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+
+    puppeteer.use(StealthPlugin());
+}

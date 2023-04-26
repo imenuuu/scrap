@@ -44,10 +44,12 @@ class MakroDetail implements AcqDetail {
                     */
                 } catch (e) {
                     logger.error("PAGE goto ERROR  -->    " + e.stack);
-                }               
+                }
 
                 let cItem :ColtItem = new ColtItem();
                 const detailPage :any = cheerio.load(await page.content());
+
+
 
 
                 let goodsName :string = detailPage('h1.mak-mb-0.mak-typo__large20.pull-left.js-product-name.capitalize').text();
@@ -55,7 +57,7 @@ class MakroDetail implements AcqDetail {
 
                 // goodsName이 파싱되지 않았을경우에 정상적인 item페이지가 아닌걸로 확인하여 makeNotFoundColtItem을 호출한다
                 if (!await validator.isNotUndefinedOrEmpty(goodsName)) {
-                    await makeItem.makeNotFoundColtItem(cItem, url, this.collectSite, itemNum, detailPage, "033");
+                    await makeItem.makeNotFoundColtItem(cItem, url, this.collectSite, itemNum, detailPage, "33");
                     return cItem;
                 }
 
@@ -71,9 +73,13 @@ class MakroDetail implements AcqDetail {
                 const product_code : string = itemNum
 
                 let brand_name :string = detailPage('div.col-md-4.col-sm-3.no-space > a > u').text();
-                let avgPoint :number = parseInt(detailPage('div.bv_avgRating_component_container.notranslate').text());
+                let avgPoint : any = parseFloat(detailPage('div.bv_avgRating_component_container.notranslate').text());
                 let totalEvalutText : any =detailPage('div.bv_numReviews_text').text();
                 let totalEvalutCnt :number= 0;
+
+                if(isNaN(avgPoint)){
+                    avgPoint=0
+                }
 
                 const match = totalEvalutText.match(/\((\d+)\)/);
                 if (match) {
@@ -162,7 +168,6 @@ class MakroDetail implements AcqDetail {
                 let parentDiv=detailPage(content)
                 let option=parentDiv.find('> div.col-sm-5.col-xs-5.mak-padding-xs > label ').text()
                 optionList.push(option);
-                console.log(option)
 
             });
 
@@ -223,10 +228,11 @@ class MakroDetail implements AcqDetail {
         try {
             detailPage('div.owl-stage > div').each((index,content)=>{
                 let parentDiv=detailPage(content)
-                let imgUrl=parentDiv.find('div > div > img ').attr('src')
-                imageList.push(imgUrl);
+                let imgUrl=parentDiv.find('div > div > img.lazyOwl.owl-lazy.mak-responsive-img.mak-hover-img ').attr('src')
+                imageList.push(imgUrl.trim());
 
             });
+            console.log(imageList)
             /*
             * imageUrl, videoUrl을 가져온다
             */
@@ -247,7 +253,7 @@ class MakroDetail implements AcqDetail {
             coltImage.hash = hash.toHash(video);
             cItem.coltImageList.push(coltImage);
         });
-        
+
     }
 
     async getAddInfo(product_code : string,detailPage :any) :Promise<string>{
@@ -267,10 +273,10 @@ class MakroDetail implements AcqDetail {
 
 
         detailPage('div.row.col-xs-12.col-sm-12 > div.mak-content__box-container > div').each((index,content)=>{
-                let parentDiv=detailPage(content)
-                let key : string = parentDiv.find('div.col-xs-12.col-md-4.no-space.mak-typo__grey').text()
-                let value : string = parentDiv.find('div.col-xs-12.col-md-8.no-space').text()
-                addinfoObj[key] = value;
+            let parentDiv=detailPage(content)
+            let key : string = parentDiv.find('div.col-xs-12.col-md-4.no-space.mak-typo__grey').text()
+            let value : string = parentDiv.find('div.col-xs-12.col-md-8.no-space').text()
+            addinfoObj[key] = value;
         });
 
         detailPage('div.pdp-product-details-moretext > div.row.col-xs-12.col-sm-12.col-md-12> div.mak-content__box-container > div.row.mak-bg__light.mak-padding-8 > div').each((index,content)=>{
