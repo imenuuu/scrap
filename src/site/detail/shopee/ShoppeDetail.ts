@@ -170,12 +170,6 @@ class ShoppeDetail implements AcqDetail {
             stockOption = 'Out of stock';
         }
 
-
-
-        /*
-        * optionList에 옵션 가져오기
-        */
-
         try {
             detailPage('div.flex.rY0UiC.j9be9C > div > div:nth-child(1)  > div.flex.items-center.bR6mEk > button').each((index,content)=>{
                 let parentDiv=detailPage(content)
@@ -282,9 +276,6 @@ class ShoppeDetail implements AcqDetail {
                         imageList.push(imgUrl.trim());
                     }
                 }
-
-
-
 
             });
         } catch (error) {

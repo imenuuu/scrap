@@ -40,7 +40,6 @@ class OechsleDetail implements AcqDetail {
                     logger.error("PAGE goto ERROR  -->    " + e.stack);
                 }               
 
-                console.log("페이지 로딩완료")
                 let cItem :ColtItem = new ColtItem();
                 const detailPage :any = cheerio.load(await page.content());
 
@@ -58,26 +57,34 @@ class OechsleDetail implements AcqDetail {
                     goodsCate = 'NO_CATEGORY';
                 }
 
-                let brand_name :string = detailPage('div.row.align-items-center > div.col-6.pdp-text-brand > h2 > div > a > font > font').text();
-                let avgPoint :number = 0;
-                let totalEvalutCnt :number= 0;
-                let addInfo :string = await this.getAddInfo(detailPage);
+                let brand_name :string = detailPage('div.row.align-items-center > div.col-6.pdp-text-brand > h2 > div > a').text();
+                let avgPoint : number = detailPage('section.mt-20.d-block.d-lg-none > #rating_bv > div > div > button > div.bv_avgRating_component_container.notranslate').text();
 
-                let orgPrice :number = 0;
-                let disPrice :number = 0;
-                // ColtItemIvt에는 할인가가 존재할때는 할인가를 넣어주고 할인가가 없으면 정가를 넣어준다
-                let ivtAddPrice :number = orgPrice;
+                let totalEvalutCnt :number= parseInt(detailPage('section.mt-20.d-block.d-lg-none > #rating_bv > div > div > button > div.bv_numReviews_component_container > div').text().replace(/\D/g,''));
 
-                // 할인가가 따로 존재할 때
-                // ColtItemDiscount에 할인가와 할인 비율을 저장
-                if (disPrice > 0) {
+                console.log(totalEvalutCnt)
+
+
+                let addInfo :string = await this.getAddInfo(detailPage,itemNum);
+
+                let orgPrice :any = ''
+                let disPrice :any = ''
+                let ivtAddPrice :number = 0;
+                if(detailPage('div.row.before-price')){
+                    orgPrice  = detailPage('div.row.before-price > div.col-7.text-right > span.text.text-gray-light.text-del.hideLine').text().replace("S/","").replace(" ","");
+                    disPrice = detailPage('div.col-7.d-flex.align-items-center.justify-content-end > span.text.fz-17.text-brown.fw-bold').text().replace("S/","").replace(" ","");
                     const coltDis : ColtItemDiscount = new ColtItemDiscount();
-                    let discountRate :number = Math.round((orgPrice - disPrice) / orgPrice * 100);
+                    let discountRate :number = detailPage('div.col-7.d-flex.align-items-center.justify-content-end > span.flag-of.ml-10').text().replace("-","").replace("%","");
                     await makeItem.makeColtItemDisCount(coltDis, disPrice, discountRate)
                     cItem.coltItemDiscountList.push(coltDis);
-                    // ivtAddPrice에 할인가 저장
-                    ivtAddPrice = disPrice;
+                    ivtAddPrice = disPrice
                 }
+                else{
+                    orgPrice = detailPage('div.col-7.d-flex.align-items-center.justify-content-end > span.text.fz-17.text-brown.fw-bold').text().replace("S/","").replace(" ","");
+                    disPrice=0;
+                    ivtAddPrice = orgPrice;
+                }
+
 
                 // makeColtItem생성
                 await makeItem.makeColtItem(cItem, url, this.collectSite, 'Oechsle', '022', goodsName, itemNum, goodsCate,
@@ -109,57 +116,103 @@ class OechsleDetail implements AcqDetail {
         let option3 :string = '';
         let option4 :string = '';
 
-        /*
-        * optionList에 옵션 가져오기
-        */
+        let sizeOptionList :Array<string> = [];
 
-        // ColtItem의 옵션 이름들에 상관없이 가져온 순서대로 넣어둔다
-        if (optionList) {
-            for (let i = 0; i < optionList.length; i++) {
-                switch (i) {
-                    case 0:
-                        option1 = optionList[i];
-                        cItem.colorOption = option1;
-                        break;
-                    case 1:
-                        option2 = optionList[i];
-                        cItem.sizeOption = option2;
-                        break;
-                    case 2:
-                        option3 = optionList[i];
-                        cItem.styleOption = option3;
-                        break;
-                    case 3:
-                        option4 = optionList[i];
-                        cItem.giftOption = option4;
-                        break;
-                }
-            }
-        }
 
-        // stockOption 은 재고있음과 재고없음 둘로 나뉜다(In stock, Out of stock)
         let stockOption :string = 'In stock';
         let stockAmout :number = -999;
 
-        if('재고 없음의 조건')
+        if(detailPage('div.container-pdp > section > div:nth-child(2) > div.d-lg-flex.d-none.mb-25.mt-25 > div.col.pr-0 > button').text()=="Elige color y talla")
             stockOption = 'Out of stock';
 
-        // ColtItemIvt를 생성하여 ColtItem에 추가
-        const ivt :ColtItemIvt = new ColtItemIvt();
-        await makeItem.makeColtItemIvt(ivt, itemNum, ivtAddPrice, option1, option2, option3, option4, stockOption, stockAmout)
-        cItem.coltItemIvtList.push(ivt);
+        try {
+            detailPage('div.sku-selector-container.sku-selector-container-0 > ul:nth-child(1) > li > span > input').each((index,content)=>{
+                let parentDiv=detailPage(content)
+                let option=parentDiv.attr('value')
+                optionList.push(option);
+
+            });
+
+        } catch (error) {
+            console.log('getOption Fail');
+        }
+
+
+
+        try {
+            detailPage('div.sku-selector-container.sku-selector-container-0 > ul:nth-child(2) > li > span > input').each((index, content) => {
+                let parentDiv = detailPage(content)
+                let sizeOption = parentDiv.attr('value')
+                sizeOptionList.push(sizeOption);
+
+            });
+
+        } catch (error) {
+            console.log('getOption Fail');
+        }
+
+        // ColtItem의 옵션 이름들에 상관없이 가져온 순서대로 넣어둔다
+        if (optionList&&sizeOptionList.length==0) {
+            for (let i = 0; i < optionList.length; i++) {
+                option1 = optionList[i];
+                cItem.colorOption = option1;
+                const ivt :ColtItemIvt = new ColtItemIvt();
+                await makeItem.makeColtItemIvt(ivt, itemNum, ivtAddPrice, option1, option2, option3, option4, stockOption, stockAmout)
+                cItem.coltItemIvtList.push(ivt);
+            }
+
+            // ColtItemIvt를 생성하여 ColtItem에 추가
+            const ivt :ColtItemIvt = new ColtItemIvt();
+            await makeItem.makeColtItemIvt(ivt, itemNum, ivtAddPrice, option1, option2, option3, option4, stockOption, stockAmout)
+            cItem.coltItemIvtList.push(ivt);
+        }
+
+        if (sizeOptionList) {
+            for (let i = 0; i < optionList.length; i++) {
+                for (let j = 0;j < sizeOptionList.length; j++) {
+                    option1 = optionList[i];
+                    cItem.colorOption = option1;
+
+                    option2 = sizeOptionList[j];
+                    cItem.sizeOption = option2;
+
+                    // ColtItemIvt를 생성하여 ColtItem에 추가
+                    const ivt :ColtItemIvt = new ColtItemIvt();
+                    await makeItem.makeColtItemIvt(ivt, itemNum, ivtAddPrice, option1, option2, option3, option4, stockOption, stockAmout)
+                    cItem.coltItemIvtList.push(ivt);
+
+                }
+            }
+
+
+        }
+
     }
 
     async getImageAndVideoInfo(detailPage : any, context :any, cItem :ColtItem) {
         let imageList :Array<string> = [];
         let videoList :Array<string> = [];
         try {
-            /*
-            * imageUrl, videoUrl을 가져온다
-            */
+
+            detailPage('ul.thumbs > li').each((index,content)=>{
+                let parentDiv=detailPage(content)
+                const imgSelect=parentDiv.find('> a').attr('rel')
+                if(imgSelect==null){
+                    const videoUrl = parentDiv.find('> a > div > meta:nth-child(4)').attr('content');
+                    videoList.push(videoUrl)
+
+                }
+                else {
+                    const imgUrl = parentDiv.find('> a > img').attr('src')
+                    imageList.push(imgUrl)
+                }
+
+            });
         } catch (error) {
             console.log('getImageAndVideoInfo Fail');
         }
+
+
         // 가져온 미디어 url들을 coltImage 데이터로 만들어서 cItem에 추가한다
         imageList.map((image) => {
             const coltImage :ColtImage = new ColtImage();
@@ -177,16 +230,19 @@ class OechsleDetail implements AcqDetail {
         
     }
 
-    async getAddInfo(detailPage :any) :Promise<string>{
+    async getAddInfo(detailPage: any, itemNum: string) :Promise<string>{
         let addinfoObj :Object = new Object();
-        let infoList :Array<any> = detailPage("addInfo 목록 파싱부분")
-        for (let info of Array.from(infoList)) {
-            let key :string = '';
-            let value :string = '';
-            if (validator.isNotUndefinedOrEmpty(key) && validator.isNotUndefinedOrEmpty(value)) {
+        addinfoObj['productCode'] = itemNum
+
+        detailPage('table.group.Ficha-Tecnica.table.-striped.text.fz-15 > tbody > tr').each((index,content)=>{
+            let parentDiv=detailPage(content)
+            let key :string = parentDiv.find('> th > h2').text();
+            let value :string = parentDiv.find('> td').text();
+            if (validator.isNotUndefinedOrEmpty(key) && validator.isNotUndefinedOrEmpty(value) && key !='Danh Mục') {
                 addinfoObj[key] = value;
             }
-        }
+        });
+
         return jsonToStr(addinfoObj);
     }
 
@@ -203,13 +259,11 @@ class OechsleDetail implements AcqDetail {
 
         });
 
-        let goodsCate :string = cateList.join(" > ") + (" > ") + goodsName;
-
-        return goodsCate;
+        return cateList.join(" > ") + (" > ") + goodsName;
     }
 
     async getItemNum(url:string, detailPage :any) :Promise<string> {
-        return detailPage('div.row.align-items-center > div.col-6.text-right > div > div').text();
+        return detailPage('div.container.pdp-module-right > div.mt-20.d-none.d-lg-block > div.row.align-items-center > div.col-6.text-right > div.pdp-text-sku > div.skuReference').text();
     }
 }
 
