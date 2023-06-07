@@ -4,7 +4,10 @@ const proxy = require("./ProxyUtil");
 
 
 export async function getPage(global) {
+    await proxy.stealthMode()
+
     const browser = await puppeteer.launch(global)
+
     let context
 
     if (global.proxyConfig['contextUse'])
